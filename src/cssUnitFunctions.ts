@@ -1,4 +1,7 @@
-function includes<T extends U, U>(coll: ReadonlyArray<T>, el: U): el is T {
+export function includes<T extends U, U>(
+  coll: ReadonlyArray<T>,
+  el: U
+): el is T {
   return coll.includes(el as T);
 }
 
@@ -107,7 +110,7 @@ export const cssUnits = [
 ] as const;
 export type CssUnit = typeof cssUnits[number];
 
-const absoluteLengthUnitFactors: Record<AbsoluteLengthUnit, number> = {
+export const absoluteLengthUnitFactors: Record<AbsoluteLengthUnit, number> = {
   cm: 96 / 2.54,
   mm: 96 / 2.54 / 10,
   Q: 96 / 2.54 / 10 / 4,
@@ -117,24 +120,24 @@ const absoluteLengthUnitFactors: Record<AbsoluteLengthUnit, number> = {
   px: 1,
 } as const;
 
-const angleUnitFactors: Record<AngleUnit, number> = {
+export const angleUnitFactors: Record<AngleUnit, number> = {
   rad: 1,
   deg: Math.PI / 180,
   grad: Math.PI / 200,
   turn: Math.PI * 2,
 } as const;
 
-const timeUnitFactors: Record<TimeUnit, number> = {
+export const timeUnitFactors: Record<TimeUnit, number> = {
   ms: 1,
   s: 1000,
 } as const;
 
-const frequencyUnitFactors: Record<FrequencyUnit, number> = {
+export const frequencyUnitFactors: Record<FrequencyUnit, number> = {
   khz: 1,
   hz: 1000,
 } as const;
 
-const resolutionUnitFactors: Record<ResolutionUnit, number> = {
+export const resolutionUnitFactors: Record<ResolutionUnit, number> = {
   dpi: 96,
   dpcm: 96 / 2.54,
   dppx: 1,
@@ -236,7 +239,9 @@ const isResolution = (element: UnitWithValue | string): boolean => {
 };
 
 /** Convert units to a canonical type. For example all absolute lengths will be converted to px */
-const convertToCanonicalUnit = (element: UnitWithValue): UnitWithValue => {
+export const convertToCanonicalUnit = (
+  element: UnitWithValue
+): UnitWithValue => {
   const unit = getLowercaseUnitName(element);
   const value = element.value;
 

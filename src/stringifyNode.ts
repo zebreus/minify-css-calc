@@ -13,39 +13,6 @@ import {
 } from "parseCalc";
 let normalConsole = require("console");
 
-const absoluteUnitLengths = {
-  cm: 37.8,
-  mm: 3.78,
-  Q: 0.945,
-  in: 96,
-  pc: 16,
-  pt: 96 / 72,
-  px: 1,
-};
-const absoluteUnits = Object.keys(absoluteUnitLengths);
-const relativeUnits = [
-  "em",
-  "ex",
-  "ch",
-  "rem",
-  "lh",
-  "rlh",
-  "vw",
-  "vh",
-  "vmin",
-  "vmax",
-  "vb",
-  "vi",
-  "svw",
-  "svh",
-  "lvw",
-  "lvh",
-  "dvw",
-  "dvh",
-  "%",
-];
-const allUnits = [...absoluteUnits, ...relativeUnits];
-
 export const stringifyNode = (node: Node) => {
   switch (node.type) {
     case "value":
@@ -128,18 +95,25 @@ export const debugNode = (node: Node, indent = 0) => {
   }
 };
 
-const stringifyValue = (node: ValueNode) => {
+const round = (value: number, maxPrecision: number) =>
+  +value.toFixed(maxPrecision);
+
+const stringifyValue = (node: ValueNode, precision = 5) => {
   if (node.value == 0) {
     return "0";
   }
   if (node.unit === "number" || node.unit === "integer") {
-    return `${node.value}`;
+    console.log(node.value.toFixed(20));
+    return `${round(node.value, precision)}`;
   }
   if (cssUnits.includes(node.unit as CssUnit)) {
-    return `${node.value}${node.unit}`;
+    return `${round(node.value, precision)}${node.unit}`;
   }
   throw new Error(
-    `Can not to convert value node with value: ${node.value} and unit: ${node.unit} to string`
+    `Can not to convert value node with value: ${round(
+      node.value,
+      precision
+    )} and unit: ${node.unit} to string`
   );
 };
 
@@ -151,7 +125,7 @@ const stringifyVar = (node: VarNode) => {
     return `var(${node.name})`;
   }
   throw new Error(
-    `Can not to convert var node with value: ${node.value} and custom property name: ${node.name} to string`
+    `Can not to convert var node with custom property ${node.name} to string`
   );
 };
 

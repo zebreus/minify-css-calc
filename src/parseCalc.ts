@@ -3,7 +3,7 @@ import { removeMultiplicationIdentity } from "./optimizers/removeMultiplicationI
 import { optimizeAst } from "optimizeAst";
 import { fixBrokenMultiplication } from "./optimizers/fixBrokenMultiplication";
 import { clampToMinAndMax } from "optimizers/clampToMinAndMax";
-import { convertAbsoluteUnitsToPixels } from "optimizers/convertAbsoluteUnitsToPixels";
+import { convertAbsoluteUnitsToCanonicalUnits } from "optimizers/convertAbsoluteUnitsToCanonicalUnits";
 import { minAndMaxToClamp } from "optimizers/minAndMaxToClamp";
 import { removeObviousMinMaxValues } from "optimizers/removeObviousMinMaxValues";
 import { addRangeInfoToMinMaxStatements } from "optimizers/addRangeInfoToMinMaxNodes";
@@ -28,7 +28,7 @@ import { integrateFreeValueIntoUnitInMultiplication } from "optimizers/integrate
 import { combineDuplicateNodesInAddition } from "optimizers/combineDuplicateNodesInAddition";
 
 const optimizations = [
-  [clampToMinAndMax, convertAbsoluteUnitsToPixels],
+  [clampToMinAndMax, convertAbsoluteUnitsToCanonicalUnits],
   // This stage does most of the optimizations, but may leave the ast weirdly formatted
   [
     sortNodes,
@@ -85,19 +85,6 @@ export const parseCalc = (
   //debugNode(optimizedAst);
   return stringifyNode(optimizedAst);
 };
-
-const absoluteUnitLengths = {
-  cm: 37.8,
-  mm: 3.78,
-  Q: 0.945,
-  in: 96,
-  pc: 16,
-  pt: 96 / 72,
-  px: 1,
-} as const;
-const absoluteUnits = Object.keys(absoluteUnitLengths) as Array<
-  keyof typeof absoluteUnitLengths
->;
 
 export type Node =
   | MaxNode
