@@ -29,6 +29,7 @@ import { combineDuplicateNodesInAddition } from "optimizers/combineDuplicateNode
 
 const optimizations = [
   [clampToMinAndMax, convertAbsoluteUnitsToPixels],
+  // This stage does most of the optimizations, but may leave the ast weirdly formatted
   [
     sortNodes,
     checkMathUnitCompatibility,
@@ -51,7 +52,15 @@ const optimizations = [
     addRangeInfoToMinMaxStatements,
     normalizeMultiplication,
     combineDuplicateNodesInAddition,
+    stripUnnecessaryMathNode,
     sortNodes,
+    integrateFreeValueIntoUnitInMultiplication,
+  ],
+  // Clean and reduce tree
+  [
+    sortNodes,
+    removeMultiplicationIdentity,
+    removeAdditionIdentity,
     integrateFreeValueIntoUnitInMultiplication,
     stripUnnecessaryMathNode,
   ],

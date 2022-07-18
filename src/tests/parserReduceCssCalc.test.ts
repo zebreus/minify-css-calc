@@ -253,7 +253,7 @@ describe("parser passes the same test suite as reduce-css-calc", () => {
 
   test("should reduce subtracted expression from zero", () => {
     expect(runParser("calc( 0 - calc(1px + 1em) )")).toEqual(
-      "calc(-1px + -1em)"
+      "calc(-1em - 1px)"
     );
   });
 
@@ -275,7 +275,7 @@ describe("parser passes the same test suite as reduce-css-calc", () => {
 
   test("should handle subtractions with different units", () => {
     expect(runParser("calc(100% - calc(666px + 1em + 2em + 100px))")).toEqual(
-      "calc(100% - 766px - 3em)"
+      "calc(100% - 3em - 766px)"
     );
   });
 });
