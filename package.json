@@ -1,7 +1,9 @@
 {
   "name": "minify-css-calc",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Parse and minify css calc statements",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "keywords": [
     "css",
     "calc",
@@ -14,7 +16,11 @@
   ],
   "scripts": {
     "test": "jest --coverage && eslint .",
-    "generate-parser": "peggy -o src/cssCalcParser.js src/cssCalcParser.peggy --format commonjs"
+    "generate-parser": "peggy -o dist/parser/cssCalcParser.js src/cssCalcParser.peggy --format commonjs",
+    "build": "tsc --noEmit false && mkdir -p dist/parser && peggy -o dist/parser/cssCalcParser.js src/parser/cssCalcParser.peggy --format commonjs",
+    "prepare": "npm run build",
+    "prepublishOnly": "true # npm test && npm run lint",
+    "preversion": "true # npm run lint"
   },
   "author": "Zebreus <lennart@googlemail.com>",
   "license": "MIT",
