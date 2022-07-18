@@ -10,9 +10,7 @@ const grammar = fs.readFileSync(
 
 const cssCalcParser = peggy.generate(grammar);
 
-const runParser = (input: string) => {
-  parseCalc(input, cssCalcParser.parse);
-};
+const runParser = (input: string) => parseCalc(input, cssCalcParser.parse);
 
 test("empty string is not valid", async () => {
   expect(() => runParser("")).toThrow();
