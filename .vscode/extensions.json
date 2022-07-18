@@ -1,0 +1,9 @@
+{
+  "recommendations": [
+    "dbaeumer.vscode-eslint",
+    "eamodio.gitlens",
+    "wix.vscode-import-cost",
+    "esbenp.prettier-vscode",
+    "PeggyJS.peggy-language"
+  ]
+}
