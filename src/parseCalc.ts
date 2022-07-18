@@ -1,6 +1,3 @@
-import peggy from "peggy";
-import fs from "fs";
-import path from "path";
 import { debugNode, stringifyNode } from "./stringifyNode";
 import { removeMultiplicationIdentity } from "./optimizers/removeMultiplicationIdentity";
 import { optimizeAst } from "optimizeAst";
@@ -29,13 +26,6 @@ import { integrateNestedMultiplication } from "optimizers/integrateNestedMultipl
 import { normalizeMultiplication } from "optimizers/normalizeMultiplications";
 import { integrateFreeValueIntoUnitInMultiplication } from "optimizers/integrateFreeValueIntoUnitInMultiplication";
 import { combineDuplicateNodesInAddition } from "optimizers/combineDuplicateNodesInAddition";
-
-const grammar = fs.readFileSync(
-  path.resolve(__dirname, "./parsers/cssCalcParser.peggy"),
-  "utf8"
-);
-
-const cssCalcParser = peggy.generate(grammar);
 
 const optimizations = [
   [clampToMinAndMax, convertAbsoluteUnitsToPixels],
@@ -76,15 +66,16 @@ const optimizations = [
   ],
 ];
 
-export const parseCalc = (input: string) => {
-  const ast: Node = cssCalcParser.parse(input);
+export const parseCalc = (
+  input: string,
+  parserFunction: (input: string) => any
+) => {
+  const ast: Node = parserFunction(input);
   //console.log(ast);
   const optimizedAst = optimizeAst(ast, optimizations);
   //debugNode(optimizedAst);
   return stringifyNode(optimizedAst);
 };
-
-export const SyntaxError = cssCalcParser.SyntaxError;
 
 const absoluteUnitLengths = {
   cm: 37.8,
