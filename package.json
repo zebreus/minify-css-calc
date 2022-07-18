@@ -2,8 +2,7 @@
   "name": "minify-css-calc",
   "version": "0.0.1",
   "description": "Parse and minify css calc statements",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "src/index.ts",
   "keywords": [
     "css",
     "calc",
@@ -17,7 +16,8 @@
   "scripts": {
     "test": "jest --coverage && eslint .",
     "generate-parser": "peggy -o dist/parser/cssCalcParser.js src/cssCalcParser.peggy --format commonjs",
-    "build": "tsc --noEmit false && mkdir -p dist/parser && peggy -o dist/parser/cssCalcParser.js src/parser/cssCalcParser.peggy --format commonjs",
+    "oldbuild": "tsc --noEmit false && mkdir -p dist/parser && peggy -o dist/parser/cssCalcParser.js src/parser/cssCalcParser.peggy --format commonjs",
+    "build": "peggy -o src/parser/cssCalcParser.js src/parser/cssCalcParser.peggy --format commonjs && ncc build --out dist",
     "prepare": "npm run build",
     "prepublishOnly": "true # npm test && npm run lint",
     "preversion": "true # npm run lint"
@@ -31,6 +31,7 @@
   "devDependencies": {
     "@types/eslint": "^8.4.3",
     "@types/jest": "^28.1.1",
+    "@vercel/ncc": "^0.34.0",
     "clean-publish": "^3.4.2",
     "css-validator": "^0.11.0",
     "eslint": "^8.0.1",
