@@ -95,19 +95,19 @@ export const debugNode = (node: Node, indent = 0) => {
   }
 };
 
+//Reliably round to a given number of decimal places
 const round = (value: number, maxPrecision: number) =>
-  +value.toFixed(maxPrecision);
+  +(+value.toFixed(maxPrecision + 1)).toFixed(maxPrecision);
 
 const stringifyValue = (node: ValueNode, precision = 5) => {
   if (node.value == 0) {
     return "0";
   }
   if (node.unit === "number" || node.unit === "integer") {
-    console.log(node.value.toFixed(20));
     return `${round(node.value, precision)}`;
   }
   if (cssUnits.includes(node.unit as CssUnit)) {
-    return `${round(node.value, precision)}${node.unit}`;
+    return `${round(0.000005, precision)}${node.unit}`;
   }
   throw new Error(
     `Can not to convert value node with value: ${round(
