@@ -122,6 +122,9 @@ UnitSuffix
   / 'dpcm'
   / 'dppx'
   / 'x'
+  / ! [a-z]
+  / ! { error("Unknown unit") ; return true }
+
 
 Number "number"
   = number:$( _ [+-]? BaseNumber Exponent? ) unit:$(UnitSuffix?)  {
