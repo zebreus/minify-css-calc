@@ -8,8 +8,8 @@ Value
   / Min
   / Max
   / Clamp
-  / CustomProperty
   / Number
+  / CustomProperty
 
 // Root calc
 Calc
@@ -123,7 +123,7 @@ Exponent
   = "e" [+-]? BaseNumber { return text() }
 
 CustomProperty
-  = "var(" _ name:([^) ]*) _  ")" { return {type: "var", name: `${name.join("")}`} }
+  = !"min(" !"max(" !"clamp(" !"calc(" prefix:([a-z-]+"(") _ value:([^) ]*) _  suffix:")" { return {type: "var", value: `${value.join("")}`, prefix: prefix[0].join("")+prefix[1],suffix: suffix} }
 
 _ "whitespace"
   = [ \t\n\r]*

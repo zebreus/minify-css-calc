@@ -35,7 +35,7 @@ export const addRangeInfoToMinMaxStatements = (node: Node) => {
               max: node.value,
             },
           ],
-        };
+        } as ValueNode;
       case "min":
       case "max": {
         if (

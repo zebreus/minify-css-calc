@@ -30,8 +30,9 @@ test("unit values get stringified", async () => {
 });
 
 test("var values get stringified", async () => {
-  expect(stringifyNode({ type: "var", name: "--test" })).toEqual("0");
-  expect(stringifyNode({ type: "var", name: "--test" })).toEqual("var(--test)");
+  expect(
+    stringifyNode({ type: "var", prefix: "var(", suffix: ")", value: "--test" })
+  ).toEqual("var(--test)");
 });
 
 test("max get stringified", async () => {

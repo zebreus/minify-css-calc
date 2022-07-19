@@ -87,7 +87,13 @@ export const debugNode = (node: Node, indent = 0) => {
       normalConsole.log(`${new Array(indent).fill(" ").join("")})`);
       return;
     case "var":
-      normalConsole.log(`${new Array(indent).fill(" ").join("")}${node.name}`);
+      normalConsole.log(
+        `${new Array(indent).fill(" ").join("")}${node.prefix}${
+          typeof node.value === "string"
+            ? node.value
+            : stringifyNode(node.value)
+        }${node.suffix}`
+      );
       return;
     default:
       const x: never = node;
@@ -117,8 +123,10 @@ const stringifyValue = (node: ValueNode, precision = 5) => {
   );
 };
 
-const stringifyVar = (node: VarNode) => {
-  return `var(${node.name})`;
+const stringifyVar = (node: VarNode): string => {
+  return `${node.prefix}${
+    typeof node.value === "string" ? node.value : stringifyNode(node.value)
+  }${node.suffix}`;
 };
 
 const stringifyMinMax = (node: MinNode | MaxNode): string => {
