@@ -2,13 +2,16 @@ import { UnitType } from "cssUnitFunctions";
 import { Node } from "parseCalc";
 import { debugNode, stringifyNode } from "stringifyNode";
 
-type OptimizerStorage = {
+export type OptimizerStorage = {
   possibleVarTypes?: Record<string, Array<UnitType>>;
 };
 
-type OptimizerFunction = (node: Node, storage?: OptimizerStorage) => Node;
+export type OptimizerFunction = (
+  node: Node,
+  storage?: OptimizerStorage
+) => Node;
 
-type OptimizerStage = Array<OptimizerStage> | OptimizerFunction;
+export type OptimizerStage = Array<OptimizerStage> | OptimizerFunction;
 
 /** Applies each stage of optimizations until they dont mutate the ast */
 export const optimizeAst = (

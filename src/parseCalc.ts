@@ -1,5 +1,5 @@
 import { UnitType } from "cssUnitFunctions";
-import { optimizeAst } from "optimizeAst";
+import { optimizeAst, OptimizerStage } from "optimizeAst";
 import { addCalcOnRootLevelIfRequired } from "optimizers/addCalcOnRootLevelIfRequired";
 import { combineDuplicateNodesInAddition } from "optimizers/addition/combineDuplicateNodesInAddition";
 import { evaluateBasicAddition } from "optimizers/addition/evaluateBasicAddition";
@@ -23,12 +23,12 @@ import { stripUnnecessaryMathNode } from "optimizers/stripUnnecessaryMathNode";
 import { stripUnnecessaryParenthesis } from "optimizers/stripUnnecessaryParenthesis";
 import { stringifyNode } from "./stringifyNode";
 
-const optimizations = [
+const optimizations: OptimizerStage = [
   [clampToMinAndMax, convertAbsoluteUnitsToCanonicalUnits],
   // This stage does most of the optimizations, but may leave the ast weirdly formatted
   [
     sortNodes,
-    checkMathUnitCompatibility,
+
     stripUnnecessaryParenthesis,
     stripUnnecessaryMathNode,
     sortNodes,
@@ -53,6 +53,7 @@ const optimizations = [
   // Clean and reduce tree
   [sortNodes, removeAdditionIdentity, stripUnnecessaryMathNode],
   [
+    checkMathUnitCompatibility,
     stripUnnecessaryMathNode,
     addNecessaryParenthesis,
     tryToKeepOnePositiveNodeInEveryAddition,
