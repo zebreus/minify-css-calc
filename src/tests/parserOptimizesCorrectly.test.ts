@@ -28,9 +28,17 @@ describe("parser does not fail on basic expressions", () => {
     expect(runParser("calc(-999)")).toEqual("-999");
   });
 
-  test("supports floats", async () => {
-    expect(runParser("calc(0.823593)")).toEqual("0.823593");
-    expect(runParser("calc(.984938)")).toEqual("0.984938");
+  // test("supports floats without rounding", async () => {
+  //   expect(runParser("calc(0.823593)")).toEqual("0.823593");
+  //   expect(runParser("calc(.984938)")).toEqual("0.984938");
+  //   expect(runParser("calc(9897.32894)")).toEqual("9897.32894");
+  //   expect(runParser("calc(-9897.32894)")).toEqual("-9897.32894");
+  //   expect(() => runParser("calc(56.)")).toThrow();
+  // });
+
+  test("supports floats with rounding", async () => {
+    expect(runParser("calc(0.823593)")).toEqual("0.82359");
+    expect(runParser("calc(.984938)")).toEqual("0.98494");
     expect(runParser("calc(9897.32894)")).toEqual("9897.32894");
     expect(runParser("calc(-9897.32894)")).toEqual("-9897.32894");
     expect(() => runParser("calc(56.)")).toThrow();
@@ -122,7 +130,8 @@ describe("parser does not fail on basic expressions", () => {
     expect(() => runParser("calc(3x * 5deg)")).toThrow();
     expect(() => runParser("calc(3ms * 5s)")).toThrow();
     expect(() => runParser("calc(3deg * 17 * 3deg)")).toThrow();
-    expect(() => runParser("calc(3deg * 0 * 3deg)")).toThrow();
+    //Invalid multiplications are allowed as long as they dont end in the final css
+    expect(runParser("calc(3deg * 0 * 3deg)")).toEqual("0");
   });
 
   test("multiplication is able to erase units", () => {
@@ -149,7 +158,7 @@ describe("parser does not fail on basic expressions", () => {
       "calc(0.22321vw - 0.71429px)"
     );
     expect(runParser("calc(14px + 6 * ((100vw - 320px) / 448))")).toEqual(
-      "calc(9.71px + 1.34vw)"
+      "calc(1.33929vw + 9.71429px)"
     );
   });
 });
