@@ -20,7 +20,7 @@
     "test": "jest --coverage && eslint .",
     "generate-parser": "peggy -o dist/parser/cssCalcParser.js src/cssCalcParser.peggy --format commonjs",
     "oldbuild": "tsc --noEmit false && mkdir -p dist/parser && peggy -o dist/parser/cssCalcParser.js src/parser/cssCalcParser.peggy --format commonjs",
-    "build": "peggy -o src/parser/cssCalcParser.js src/parser/cssCalcParser.peggy --format commonjs && ncc build --out dist",
+    "build": "peggy -o src/parser/cssCalcParser.js src/parser/cssCalcParser.peggy --format commonjs && ncc build --out dist src/index.ts",
     "prepare": "npm run build",
     "prepublishOnly": "true # npm test && npm run lint",
     "preversion": "true # npm run lint"
