@@ -124,7 +124,7 @@ export type ValueNode = {
 
 export type VarNode = {
   type: "var";
-  value: number;
+  value?: undefined;
   name: string;
   rangeInfo?: Array<{ unit: string; min: number; max: number }>;
   possibleUnits?: Array<UnitType>;

@@ -118,15 +118,7 @@ const stringifyValue = (node: ValueNode, precision = 5) => {
 };
 
 const stringifyVar = (node: VarNode) => {
-  if (node.value == 0) {
-    return "0";
-  }
-  if (node.value == 1) {
-    return `var(${node.name})`;
-  }
-  throw new Error(
-    `Can not to convert var node with custom property ${node.name} to string`
-  );
+  return `var(${node.name})`;
 };
 
 const stringifyMinMax = (node: MinNode | MaxNode): string => {
