@@ -1,5 +1,4 @@
 import { debugNode, stringifyNode } from "./stringifyNode";
-import { removeMultiplicationIdentity } from "./optimizers/removeMultiplicationIdentity";
 import { optimizeAst } from "optimizeAst";
 import { fixBrokenMultiplication } from "./optimizers/fixBrokenMultiplication";
 import { clampToMinAndMax } from "optimizers/clampToMinAndMax";
@@ -11,18 +10,18 @@ import { integrateNestedMinMaxNodes } from "optimizers/integrateNestedMinMaxNode
 import { stripUnnecessaryParenthesis } from "optimizers/stripUnnecessaryParenthesis";
 import { evaluateBasicAddition } from "optimizers/evaluateBasicAddition";
 import { stripUnnecessaryMathNode } from "optimizers/stripUnnecessaryMathNode";
-import { evaluateBasicMultiplication } from "optimizers/evaluateBasicMultiplication";
+import { evaluateBasicMultiplication } from "optimizers/multiplication/evaluateBasicMultiplication";
 import { addCalcOnRootLevelIfRequired } from "optimizers/addCalcOnRootLevelIfRequired";
 import { sortNodes } from "optimizers/sortNodes";
 import { removeAdditionIdentity } from "optimizers/removeAdditionIdentity";
 import { tryToKeepOnePositiveNodeInEveryAddition } from "optimizers/tryToKeepOnePositiveNodeInEveryAddition";
 import { UnitType } from "cssUnitFunctions";
 import { checkMathUnitCompatibility } from "optimizers/checkMathUnitCompatibility";
-import { expandMultiplications } from "optimizers/expandMultiplications";
+import { expandMultiplications } from "optimizers/multiplication/expandMultiplications";
 import { addNecessaryParenthesis } from "optimizers/addNecessaryParenthesis";
 import { stripOptionalInformation } from "optimizers/stripOptionalInformation";
 import { integrateNestedAddition } from "optimizers/integrateNestedAddition";
-import { integrateNestedMultiplication } from "optimizers/integrateNestedMultiplication";
+import { integrateNestedMultiplication } from "optimizers/multiplication/integrateNestedMultiplication";
 import { normalizeMultiplication } from "optimizers/normalizeMultiplications";
 import { integrateFreeValueIntoUnitInMultiplication } from "optimizers/integrateFreeValueIntoUnitInMultiplication";
 import { combineDuplicateNodesInAddition } from "optimizers/combineDuplicateNodesInAddition";
@@ -43,7 +42,6 @@ const optimizations = [
     evaluateBasicAddition,
     evaluateBasicMultiplication,
     sortNodes,
-    removeMultiplicationIdentity,
     removeAdditionIdentity,
     fixBrokenMultiplication,
     sortNodes,
@@ -59,7 +57,6 @@ const optimizations = [
   // Clean and reduce tree
   [
     sortNodes,
-    removeMultiplicationIdentity,
     removeAdditionIdentity,
     integrateFreeValueIntoUnitInMultiplication,
     stripUnnecessaryMathNode,

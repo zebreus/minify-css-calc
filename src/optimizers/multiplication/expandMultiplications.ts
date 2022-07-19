@@ -5,8 +5,8 @@ import {
   MultiplicationNode,
   Node,
   ValueNode,
-} from "../parseCalc";
-import { visitor } from "../visitor";
+} from "../../parseCalc";
+import { visitor } from "../../visitor";
 
 /**
  * Convert multiplications to the expanded form
@@ -25,6 +25,7 @@ export const expandMultiplications = (node: Node) => {
     const multiplicationNodes = node.values
       .filter((value) => value.operation === "*")
       .map((value) => value.value);
+
     const divisionNodes = node.values
       .filter((value) => value.operation === "/")
       .map((value) => value.value);
@@ -36,13 +37,14 @@ export const expandMultiplications = (node: Node) => {
           ? node.values
           : [{ operation: "+" as const, value: node as Node }]
       );
-    const divisionComponents = divisionNodes
-      .map((node) => (node.type === "parenthesis" ? node.value : node))
-      .map((node) =>
-        node.type === "addition"
-          ? node.values
-          : [{ operation: "+" as const, value: node as Node }]
-      );
+
+    // const divisionComponents = divisionNodes
+    //   .map((node) => (node.type === "parenthesis" ? node.value : node))
+    //   .map((node) =>
+    //     node.type === "addition"
+    //       ? node.values
+    //       : [{ operation: "+" as const, value: node as Node }]
+    //   );
 
     const multNodes = multiplicationComponents.reduce(
       (acc, components) => {
@@ -64,25 +66,25 @@ export const expandMultiplications = (node: Node) => {
       ] as { operation: "+" | "-"; values: Node[] }[]
     );
 
-    const divNodes = divisionComponents.reduce(
-      (acc, components) => {
-        return acc.flatMap((oldSum) =>
-          components.map((component) => ({
-            operation:
-              component.operation === oldSum.operation
-                ? ("+" as const)
-                : ("-" as const),
-            values: [...oldSum.values, component.value],
-          }))
-        );
-      },
-      [
-        {
-          operation: "+",
-          values: [],
-        },
-      ] as { operation: "+" | "-"; values: Node[] }[]
-    );
+    // const divNodes = divisionComponents.reduce(
+    //   (acc, components) => {
+    //     return acc.flatMap((oldSum) =>
+    //       components.map((component) => ({
+    //         operation:
+    //           component.operation === oldSum.operation
+    //             ? ("+" as const)
+    //             : ("-" as const),
+    //         values: [...oldSum.values, component.value],
+    //       }))
+    //     );
+    //   },
+    //   [
+    //     {
+    //       operation: "+",
+    //       values: [],
+    //     },
+    //   ] as { operation: "+" | "-"; values: Node[] }[]
+    // );
 
     // const multiplicationSum: AdditionNode | undefined =
     //   multNodes.length === 0

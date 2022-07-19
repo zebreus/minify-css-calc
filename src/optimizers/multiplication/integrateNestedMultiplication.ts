@@ -1,6 +1,7 @@
 import { reverseVisitor } from "reverseVisitor";
-import { MultiplicationNode, Node } from "../parseCalc";
-import { visitor } from "../visitor";
+import { debugNode } from "stringifyNode";
+import { MultiplicationNode, Node } from "../../parseCalc";
+import { visitor } from "../../visitor";
 
 export const integrateNestedMultiplication = (node: Node) => {
   return reverseVisitor(node, (node: Node) => {

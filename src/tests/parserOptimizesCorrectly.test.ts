@@ -124,4 +124,32 @@ describe("parser does not fail on basic expressions", () => {
     expect(() => runParser("calc(3deg * 17 * 3deg)")).toThrow();
     expect(() => runParser("calc(3deg * 0 * 3deg)")).toThrow();
   });
+
+  test("multiplication is able to erase units", () => {
+    // This is not in the css standard, but mathematically correct
+    expect(runParser("calc(5px/5px)")).toEqual("1");
+    expect(runParser("calc(3*5px/5px)")).toEqual("3");
+    expect(runParser("calc(5px*3/5px)")).toEqual("3");
+    expect(runParser("calc(5px*3px/5px)")).toEqual("3px");
+    expect(runParser("calc(5turn*3px/5turn)")).toEqual("3px");
+    expect(runParser("calc(5turn*6px/10turn)")).toEqual("3px");
+  });
+
+  test("nested equations get integrated", () => {
+    expect(runParser("calc(((1+1+1)*0.5)*1)")).toEqual("calc(1vw - 1px)");
+  });
+
+  test("does not produce weird errors with nested multiplication", () => {
+    expect(runParser("calc(1*((1-1-1)*0.5))")).toEqual("-0.5");
+    expect(runParser("calc(1*((1-1)*0.5))")).toEqual("0");
+    expect(runParser("calc(1*((233vw-233px)/233))")).toEqual("calc(1vw - 1px)");
+    expect(runParser("calc((448vw-448px)/112)")).toEqual("calc(4vw - 4px)");
+    expect(runParser("calc(1*((448vw-448px)/112))")).toEqual("calc(4vw - 4px)");
+    expect(runParser("calc(((100vw - 320px) / 448) * 1)")).toEqual(
+      "calc(0.22321vw - 0.71429px)"
+    );
+    expect(runParser("calc(14px + 6 * ((100vw - 320px) / 448))")).toEqual(
+      "calc(9.71px + 1.34vw)"
+    );
+  });
 });
