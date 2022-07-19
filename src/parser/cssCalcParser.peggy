@@ -169,10 +169,13 @@ TextValue
 RootTextValue
   = value:Value { return {value: value, text: text()}}
 
-RootTemplateContent
-  = !([ \t\n\r]) value:TextValue tc:RootTemplateContent {return {values: {...tc.values, [value.text]: value.value}, value: text()}}
-  / [^()] tc:RootTemplateContent {return {values: tc.values, value: text()}}
+RootTemplateContentSeparator
+  = [^()+*/-] tc:RootTemplateContent {return {values: tc.values, value: text()}}
   / []* {return {values: {}, value: text()}}
+
+RootTemplateContent
+  = !([ \t\n\r]) value:TextValue tc:RootTemplateContentSeparator {return {values: {...tc.values, [value.text]: value.value}, value: text()}}
+  / RootTemplateContentSeparator
 
 TemplateContent
   = !([ \t\n\r]) value:TextValue tc:TemplateContent {return {values: {...tc.values, [value.text]: value.value}, value: text()}}
