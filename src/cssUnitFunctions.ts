@@ -128,13 +128,13 @@ export const angleUnitFactors: Record<AngleUnit, number> = {
 } as const;
 
 export const timeUnitFactors: Record<TimeUnit, number> = {
-  ms: 1,
-  s: 1000,
+  ms: 0.001,
+  s: 1,
 } as const;
 
 export const frequencyUnitFactors: Record<FrequencyUnit, number> = {
-  khz: 1,
-  hz: 1000,
+  khz: 0.001,
+  hz: 1,
 } as const;
 
 export const resolutionUnitFactors: Record<ResolutionUnit, number> = {
@@ -262,14 +262,14 @@ export const convertToCanonicalUnit = (
   if (includes(timeUnits, unit)) {
     return {
       value: value * timeUnitFactors[unit],
-      unit: "ms",
+      unit: "s",
     };
   }
 
   if (includes(frequencyUnits, unit)) {
     return {
       value: value * frequencyUnitFactors[unit],
-      unit: "khz",
+      unit: "hz",
     };
   }
 
