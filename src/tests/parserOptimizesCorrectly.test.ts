@@ -144,6 +144,14 @@ describe("parser does not fail on basic expressions", () => {
     expect(runParser("calc(5turn*6px/10turn)")).toEqual("3px");
   });
 
+  test("multiplication keeps the correct units in divisions", () => {
+    // This is not in the css standard, but mathematically correct
+    expect(runParser("calc(500px/2px)")).toEqual("250");
+    expect(runParser("calc(500px/2)")).toEqual("250px");
+    expect(() => runParser("calc(500/2px)")).toThrow();
+    expect(() => runParser("calc(500px/2px/2px)")).toThrow();
+  });
+
   test("nested equations get integrated", () => {
     expect(runParser("calc(((1+1+1)*0.5)*1)")).toEqual("1.5");
   });

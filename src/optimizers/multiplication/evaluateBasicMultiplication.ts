@@ -138,6 +138,22 @@ const moveAllFactorIntoASingleNumber = (
   return { ...node, values: newValueElements };
 };
 
+const ensureNoDivisionByZero = (
+  node: MultiplicationNode
+): MultiplicationNode => {
+  const zeroDivisions = node.values.forEach((value) => {
+    if (
+      value.value.type === "value" &&
+      value.operation === "/" &&
+      value.value.value === 0
+    ) {
+      throw new Error(`Division by zero in ${stringifyNode(node)}`);
+    }
+  });
+
+  return node;
+};
+
 const integrateUnitlessNodeIntoUnitNode = (
   node: MultiplicationNode
 ): MultiplicationNode => {
@@ -166,7 +182,6 @@ const integrateUnitlessNodeIntoUnitNode = (
     valueElements.find(
       (element) => element.value.unit !== "number" && element.operation === "*"
     ) ||
-    valueElements.find((element) => element.value.unit !== "number") ||
     ({
       operation: "*",
       value: { type: "value", value: 1, unit: "number" },
@@ -258,7 +273,8 @@ export const evaluateBasicMultiplication = (node: Node) => {
 
       const stage1 = removeCancelledOutUnits(node);
       const stage11 = removeCancelledOutElements(stage1);
-      const stage2 = moveAllFactorIntoASingleNumber(stage11);
+      const stage12 = ensureNoDivisionByZero(stage11);
+      const stage2 = moveAllFactorIntoASingleNumber(stage12);
       const stage3 = integrateUnitlessNodeIntoUnitNode(stage2);
       const stage4 = removeMultiplicationIdentity(stage3);
       const stage5 = removeUnneccessaryMultiplication(stage4);

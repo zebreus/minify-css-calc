@@ -243,9 +243,14 @@ describe("parser passes the same test suite as reduce-css-calc", () => {
     expect(() => runParser("calc(500px/0)")).toThrow();
   });
 
-  test("should throw an exception when attempting to divide by unit (#1)", () => {
+  //TODO: While it is not standard behaviour, we do allow dividing by a unit, as long as the unit is balanced within multiplications and divisions
+  test.skip("should throw an exception when attempting to divide by unit (#1)", () => {
     // reduce-css-calc error message: 'Cannot divide by "px", number expected'
     expect(() => runParser("calc(500px/2px)")).toThrow();
+  });
+  test("should throw an exception when a division by an unit remains", () => {
+    // This test is not from reduce-css-calc
+    expect(() => runParser("calc(500/2px)")).toThrow();
   });
 
   test("should reduce substraction from zero", () => {
