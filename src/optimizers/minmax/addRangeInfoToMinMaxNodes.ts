@@ -6,8 +6,8 @@ import {
   MultiplicationNode,
   Node,
   ValueNode,
-} from "../parseCalc";
-import { visitor } from "../visitor";
+} from "../../parseCalc";
+import { visitor } from "../../visitor";
 
 const mapByUnit = (values: Array<ValueNode>) => {
   return values.reduce((acc, { value, unit }) => {

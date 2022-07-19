@@ -1,30 +1,29 @@
-import { debugNode, stringifyNode } from "./stringifyNode";
-import { optimizeAst } from "optimizeAst";
-import { fixBrokenMultiplication } from "./optimizers/fixBrokenMultiplication";
-import { clampToMinAndMax } from "optimizers/clampToMinAndMax";
-import { convertAbsoluteUnitsToCanonicalUnits } from "optimizers/convertAbsoluteUnitsToCanonicalUnits";
-import { minAndMaxToClamp } from "optimizers/minAndMaxToClamp";
-import { removeObviousMinMaxValues } from "optimizers/removeObviousMinMaxValues";
-import { addRangeInfoToMinMaxStatements } from "optimizers/addRangeInfoToMinMaxNodes";
-import { integrateNestedMinMaxNodes } from "optimizers/integrateNestedMinMaxNodes";
-import { stripUnnecessaryParenthesis } from "optimizers/stripUnnecessaryParenthesis";
-import { evaluateBasicAddition } from "optimizers/evaluateBasicAddition";
-import { stripUnnecessaryMathNode } from "optimizers/stripUnnecessaryMathNode";
-import { evaluateBasicMultiplication } from "optimizers/multiplication/evaluateBasicMultiplication";
-import { addCalcOnRootLevelIfRequired } from "optimizers/addCalcOnRootLevelIfRequired";
-import { sortNodes } from "optimizers/sortNodes";
-import { removeAdditionIdentity } from "optimizers/removeAdditionIdentity";
-import { tryToKeepOnePositiveNodeInEveryAddition } from "optimizers/tryToKeepOnePositiveNodeInEveryAddition";
 import { UnitType } from "cssUnitFunctions";
-import { checkMathUnitCompatibility } from "optimizers/checkMathUnitCompatibility";
-import { expandMultiplications } from "optimizers/multiplication/expandMultiplications";
+import { optimizeAst } from "optimizeAst";
+import { addCalcOnRootLevelIfRequired } from "optimizers/addCalcOnRootLevelIfRequired";
+import { combineDuplicateNodesInAddition } from "optimizers/addition/combineDuplicateNodesInAddition";
+import { evaluateBasicAddition } from "optimizers/addition/evaluateBasicAddition";
+import { integrateNestedAddition } from "optimizers/addition/integrateNestedAddition";
+import { removeAdditionIdentity } from "optimizers/addition/removeAdditionIdentity";
+import { tryToKeepOnePositiveNodeInEveryAddition } from "optimizers/addition/tryToKeepOnePositiveNodeInEveryAddition";
 import { addNecessaryParenthesis } from "optimizers/addNecessaryParenthesis";
-import { stripOptionalInformation } from "optimizers/stripOptionalInformation";
-import { integrateNestedAddition } from "optimizers/integrateNestedAddition";
+import { checkMathUnitCompatibility } from "optimizers/checkMathUnitCompatibility";
+import { convertAbsoluteUnitsToCanonicalUnits } from "optimizers/convertAbsoluteUnitsToCanonicalUnits";
+import { addRangeInfoToMinMaxStatements } from "optimizers/minmax/addRangeInfoToMinMaxNodes";
+import { clampToMinAndMax } from "optimizers/minmax/clampToMinAndMax";
+import { integrateNestedMinMaxNodes } from "optimizers/minmax/integrateNestedMinMaxNodes";
+import { minAndMaxToClamp } from "optimizers/minmax/minAndMaxToClamp";
+import { removeObviousMinMaxValues } from "optimizers/minmax/removeObviousMinMaxValues";
+import { evaluateBasicMultiplication } from "optimizers/multiplication/evaluateBasicMultiplication";
+import { expandMultiplications } from "optimizers/multiplication/expandMultiplications";
+import { integrateFreeValueIntoUnitInMultiplication } from "optimizers/multiplication/integrateFreeValueIntoUnitInMultiplication";
 import { integrateNestedMultiplication } from "optimizers/multiplication/integrateNestedMultiplication";
-import { normalizeMultiplication } from "optimizers/normalizeMultiplications";
-import { integrateFreeValueIntoUnitInMultiplication } from "optimizers/integrateFreeValueIntoUnitInMultiplication";
-import { combineDuplicateNodesInAddition } from "optimizers/combineDuplicateNodesInAddition";
+import { normalizeMultiplication } from "optimizers/multiplication/normalizeMultiplications";
+import { sortNodes } from "optimizers/sortNodes";
+import { stripOptionalInformation } from "optimizers/stripOptionalInformation";
+import { stripUnnecessaryMathNode } from "optimizers/stripUnnecessaryMathNode";
+import { stripUnnecessaryParenthesis } from "optimizers/stripUnnecessaryParenthesis";
+import { stringifyNode } from "./stringifyNode";
 
 const optimizations = [
   [clampToMinAndMax, convertAbsoluteUnitsToCanonicalUnits],
@@ -43,7 +42,6 @@ const optimizations = [
     evaluateBasicMultiplication,
     sortNodes,
     removeAdditionIdentity,
-    fixBrokenMultiplication,
     sortNodes,
     removeObviousMinMaxValues,
     stripUnnecessaryMathNode,

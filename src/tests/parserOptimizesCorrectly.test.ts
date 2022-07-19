@@ -136,7 +136,7 @@ describe("parser does not fail on basic expressions", () => {
   });
 
   test("nested equations get integrated", () => {
-    expect(runParser("calc(((1+1+1)*0.5)*1)")).toEqual("calc(1vw - 1px)");
+    expect(runParser("calc(((1+1+1)*0.5)*1)")).toEqual("1.5");
   });
 
   test("does not produce weird errors with nested multiplication", () => {

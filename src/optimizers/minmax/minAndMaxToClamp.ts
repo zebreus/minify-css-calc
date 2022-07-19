@@ -1,5 +1,5 @@
-import { MultiplicationNode, Node } from "../parseCalc";
-import { visitor } from "../visitor";
+import { MultiplicationNode, Node } from "../../parseCalc";
+import { visitor } from "../../visitor";
 
 export const minAndMaxToClamp = (node: Node) => {
   return visitor(

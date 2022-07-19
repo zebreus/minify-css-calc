@@ -1,5 +1,5 @@
-import { MultiplicationNode, Node, ValueNode } from "../parseCalc";
-import { visitor } from "../visitor";
+import { MultiplicationNode, Node, ValueNode } from "../../parseCalc";
+import { visitor } from "../../visitor";
 
 export const tryToKeepOnePositiveNodeInEveryAddition = (node: Node) => {
   return visitor(
