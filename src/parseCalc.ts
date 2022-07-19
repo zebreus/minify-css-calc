@@ -28,7 +28,6 @@ const optimizations: OptimizerStage = [
   // This stage does most of the optimizations, but may leave the ast weirdly formatted
   [
     sortNodes,
-
     stripUnnecessaryParenthesis,
     stripUnnecessaryMathNode,
     sortNodes,
@@ -49,11 +48,17 @@ const optimizations: OptimizerStage = [
     sortNodes,
   ],
   // Do a final round of value math
-  [evaluateBasicMultiplication],
+  [evaluateBasicMultiplication, evaluateBasicAddition],
   // Clean and reduce tree
-  [sortNodes, removeAdditionIdentity, stripUnnecessaryMathNode],
   [
-    checkMathUnitCompatibility,
+    sortNodes,
+    removeAdditionIdentity,
+    stripUnnecessaryMathNode,
+    stripUnnecessaryParenthesis,
+  ],
+  // Check for math unit compatibility
+  checkMathUnitCompatibility,
+  [
     stripUnnecessaryMathNode,
     addNecessaryParenthesis,
     tryToKeepOnePositiveNodeInEveryAddition,

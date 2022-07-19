@@ -1,6 +1,12 @@
 import { MultiplicationNode, Node, ValueNode } from "../../parseCalc";
 import { visitor } from "../../visitor";
 
+/**
+ * The shortest representation for addition nodes can be achieved, by having at least one add operation and reducing the number of signed values
+ *
+ * 1px + -1 => 1px - 1
+ * 0 - 1in - 1px => -1in - 1px
+ */
 export const tryToKeepOnePositiveNodeInEveryAddition = (node: Node) => {
   return visitor(
     node,
@@ -10,36 +16,48 @@ export const tryToKeepOnePositiveNodeInEveryAddition = (node: Node) => {
         return node;
       }
 
-      const positiveValues = node.values
-        .filter((value) => value.operation === "+")
-        .map((value) => value.value);
-      const negativeValues = node.values
-        .filter((value) => value.operation === "-")
-        .map((value) => value.value);
+      const valueElements = node.values.flatMap((value) =>
+        value.value.type === "value" ? [{ ...value, value: value.value }] : []
+      );
+      const otherElements = node.values.filter(
+        (value) => value.value.type !== "value"
+      );
 
-      if (positiveValues.length !== 0) {
-        return node;
-      }
+      const positiveValueElements = valueElements.map((element) => ({
+        ...element,
+        operation:
+          element.operation === (element.value.value >= 0 ? "+" : "-")
+            ? ("+" as const)
+            : ("-" as const),
+        value: {
+          ...element.value,
+          value: Math.abs(element.value.value),
+        } as ValueNode,
+      }));
 
-      const negativeValue = negativeValues.find(
-        (value) => value.type === "value"
-      ) as ValueNode | undefined;
+      const alreadyHasPositiveOperation =
+        otherElements.some((element) => element.operation === "+") ||
+        positiveValueElements.some((element) => element.operation === "+");
 
-      if (!negativeValue) {
-        return node;
-      }
+      const newValueElements = alreadyHasPositiveOperation
+        ? [...positiveValueElements, ...otherElements]
+        : positiveValueElements.length > 0
+        ? [
+            {
+              operation: "+" as const,
+              value: {
+                ...positiveValueElements[0].value,
+                value: -1 * positiveValueElements[0].value.value,
+              } as ValueNode,
+            },
+            ...positiveValueElements.slice(1),
+            ...otherElements,
+          ]
+        : [...positiveValueElements, ...otherElements];
 
       return {
         ...node,
-        values: [
-          ...negativeValues
-            .filter((value) => value !== negativeValue)
-            .map((value) => ({ operation: "-" as const, value })),
-          {
-            operation: "+",
-            value: { ...negativeValue, value: negativeValue.value * -1 },
-          },
-        ],
+        values: newValueElements,
       };
     }
   );
