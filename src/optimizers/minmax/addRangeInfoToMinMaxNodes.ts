@@ -21,6 +21,8 @@ const mapByUnit = (values: Array<ValueNode>) => {
 
 /**
  * If there is max statement inside a min statement, try to optimize that
+ *
+ * Only works if a min or max statement contains only values and opposing statements
  */
 export const addRangeInfoToMinMaxStatements = (node: Node) => {
   return reverseVisitor(node, (node: Node) => {
@@ -42,7 +44,8 @@ export const addRangeInfoToMinMaxStatements = (node: Node) => {
           node.values.find(
             (child) => child.type !== "var" && child.rangeInfo === undefined
           ) ||
-          !node.values.find((child) => child.type !== "var")
+          !node.values.find((child) => child.type !== "var") ||
+          node.values.find((child) => child.type === node.type)
         ) {
           return node;
         }
@@ -67,6 +70,8 @@ export const addRangeInfoToMinMaxStatements = (node: Node) => {
               max: Infinity,
             }))
           : [];
+
+        console.log("rangeinfos", rangeInfos);
 
         const reducedRangeInfos = rangeInfos.reduce(
           (newRangeInfos, rangeInfo) => {
@@ -106,6 +111,7 @@ export const addRangeInfoToMinMaxStatements = (node: Node) => {
 
         if (canBeResolved) {
           if (reducedRangeInfos.length === 1) {
+            console.log("resolved with l1 rangeinfos", reducedRangeInfos);
             return {
               ...node,
               type: "value",
@@ -114,6 +120,7 @@ export const addRangeInfoToMinMaxStatements = (node: Node) => {
               rangeInfo: reducedRangeInfos,
             };
           }
+          console.log("resolved with complex rangeinfos", reducedRangeInfos);
           return {
             ...node,
             values: reducedRangeInfos.map((rangeInfo) => ({
@@ -124,6 +131,8 @@ export const addRangeInfoToMinMaxStatements = (node: Node) => {
             rangeInfo: reducedRangeInfos,
           };
         }
+
+        console.log("added rangeinfos", reducedRangeInfos);
 
         return { ...node, rangeInfo: reducedRangeInfos };
         // const varNodes = node.values.flatMap((value) =>

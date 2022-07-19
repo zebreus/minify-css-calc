@@ -113,6 +113,16 @@ describe("parser optimizes min, max and clamp", () => {
     ).toEqual("min(3px,3rem,max(3px,3rem,var(--test)),var(--test))");
   });
 
+  test("nested min works", async () => {
+    expect(runParser("min(3em,min(3px,3rem))")).toEqual("min(3em,3px,3rem)");
+    expect(runParser("min(3em,3px,var(--test))")).toEqual(
+      "min(3em,3px,var(--test))"
+    );
+    expect(runParser("min(3em,min(3px,var(--test)))")).toEqual(
+      "min(3em,3px,var(--test))"
+    );
+  });
+
   test("nested min and max get integrated", async () => {
     expect(runParser("min(min(3))")).toEqual("3");
     expect(runParser("min(3em,min(3px,var(--test)))")).toEqual(

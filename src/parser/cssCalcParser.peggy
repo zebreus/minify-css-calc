@@ -29,19 +29,19 @@ Calc
   / prefix:CalcPrefix "(" _ expr:Expression _ ")" { return { type: "calc", prefix: prefix, value: expr } }
   
 Min
-  = "min(" _ expr:Value more:( _ "," _ Value )* _ ")" {
+  = "min(" _ expr:Expression more:( _ "," _ Expression )* _ ")" {
       const values = [expr, ...more.map(element => element[3])]
       return {type: "min", values}
     }
 
 Max
-  = "max(" _ expr:Value more:( _ "," _ Value )* _ ")" {
+  = "max(" _ expr:Expression more:( _ "," _ Expression )* _ ")" {
       const values = [expr, ...more.map(element => element[3])]
       return {type: "max", values}
     }
 
 Clamp
-  = "clamp(" _ min:Value _ "," _ value:Value _ "," _ max:Value  _ ")" {
+  = "clamp(" _ min:Expression _ "," _ value:Expression _ "," _ max:Expression  _ ")" {
       return {type: "clamp", min, value, max}
     }
 
@@ -134,12 +134,24 @@ BaseNumber
 Exponent
   = "e" [+-]? BaseNumber { return text() }
 
+CustomPropertyPrefix
+  = "var("
+  / "env("
+  / "constant("
+
 CustomProperty
-  = !"min(" !"max(" !"clamp(" !"calc(" ([a-z-]+) "(" content:TemplateContent {
+  = CustomPropertyPrefix content:TemplateContent {
     const result = {type: "var", value: text(), values: content.values, kind: "customProperty"}
     console.log(result)
     return result
     }
+
+//   CustomProperty
+// = !"min(" !"max(" !"clamp(" !"calc(" ([a-z-]+) "(" content:TemplateContent {
+//   const result = {type: "var", value: text(), values: content.values, kind: "customProperty"}
+//   console.log(result)
+//   return result
+//   }
 
 SpecialValue
   = Calc
@@ -156,8 +168,8 @@ RootTextValue
 
 RootTemplateContent
   = !([ \t\n\r]) value:TextValue tc:RootTemplateContent {return {values: {...tc.values, [value.text]: value.value}, value: text()}}
-  / . tc:RootTemplateContent {return {values: tc.values, value: text()}}
-  / .* {return {values: {}, value: text()}}
+  / [^()] tc:RootTemplateContent {return {values: tc.values, value: text()}}
+  / []* {return {values: {}, value: text()}}
 
 TemplateContent
   = !([ \t\n\r]) value:TextValue tc:TemplateContent {return {values: {...tc.values, [value.text]: value.value}, value: text()}}

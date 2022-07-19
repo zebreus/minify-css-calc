@@ -76,17 +76,32 @@ describe("parser does not fail on basic expressions", () => {
     expect(runParser("var(--toast)")).toEqual("var(--toast)");
   });
 
-  test("calc is required in expressiosn", async () => {
-    expect(() => runParser("min(5-3)")).toThrow();
-    expect(() => runParser("min(calc(5-3))")).not.toThrow();
-    expect(() => runParser("max(5-3)")).toThrow();
-    expect(() => runParser("max(calc(5-3))")).not.toThrow();
-    expect(() => runParser("clamp(0,5-3,6)")).toThrow();
-    expect(() => runParser("clamp(0,calc(5-3),6)")).not.toThrow();
-    expect(() => runParser("clamp(5-3,0,6)")).toThrow();
-    expect(() => runParser("clamp(calc(5-3),0,6)")).not.toThrow();
-    expect(() => runParser("clamp(0,0,5-3)")).toThrow();
-    expect(() => runParser("clamp(0,0,calc(5-3))")).not.toThrow();
+  test("calc is not required in expressiosn", async () => {
+    expect(runParser("min(5-3)")).toEqual("2");
+    expect(runParser("min(calc(5-3))")).toEqual("2");
+    expect(runParser("max(5-3)")).toEqual("2");
+    expect(runParser("max(calc(5-3))")).toEqual("2");
+    expect(runParser("clamp(0,5-3,6)")).toEqual("2");
+    expect(runParser("clamp(0,calc(5-3),6)")).toEqual("2");
+    expect(runParser("clamp(5-3,0,6)")).toEqual("2");
+    expect(runParser("clamp(calc(5-3),0,6)")).toEqual("2");
+    expect(runParser("clamp(0,0,5-3)")).toEqual("0");
+    expect(runParser("clamp(0,0,calc(5-3))")).toEqual("0");
+  });
+
+  test("empty min is invalid", async () => {
+    expect(() => runParser("min(()")).toThrow();
+  });
+
+  test("empty max is invalid", async () => {
+    expect(() => runParser("max()")).toThrow();
+  });
+
+  test("clamp needs three values", async () => {
+    expect(() => runParser("clamp()")).toThrow();
+    expect(() => runParser("clamp(1)")).toThrow();
+    expect(() => runParser("clamp(1,2)")).toThrow();
+    expect(() => runParser("clamp(1,2,3,4)")).toThrow();
   });
 
   test("extra test", async () => {
