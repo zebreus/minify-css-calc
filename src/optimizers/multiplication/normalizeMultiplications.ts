@@ -79,7 +79,8 @@ const normalizeMultiplicationNode = (node: MultiplicationNode) => {
   };
 };
 
-/** Move all factors in multiplications into a seperate value
+/** @deprecated: replaced by evaluate basic multiplication
+ * Move all factors in multiplications into a seperate value
  *
  * 2rem * 2 => 4 * 1rem
  *

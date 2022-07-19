@@ -1,4 +1,4 @@
-import { debugNode } from "stringifyNode";
+import { debugNode, stringifyNode } from "stringifyNode";
 import { MultiplicationNode, Node, ValueNode } from "../../parseCalc";
 import { visitor } from "../../visitor";
 
@@ -53,6 +53,53 @@ const removeCancelledOutUnits = (
   );
 
   return { ...node, values: [...otherElements, ...newValueElements] };
+};
+
+/**
+ * Remove units in a multiplication that cancel each other out
+ */
+const removeCancelledOutElements = (
+  node: MultiplicationNode
+): MultiplicationNode => {
+  const elements = node.values.map((element) => ({
+    text: stringifyNode(element.value),
+    operation: element.operation,
+    node: element.value,
+  }));
+
+  const sortedElements = elements.reduce(
+    (acc, value) => ({
+      ...acc,
+      [value.text]: {
+        division: [
+          ...(acc[value.text]?.division ?? []),
+          ...(value.operation === "/" ? [value.node] : []),
+        ],
+        multiplication: [
+          ...(acc[value.text]?.multiplication ?? []),
+          ...(value.operation === "*" ? [value.node] : []),
+        ],
+      },
+    }),
+    {} as Record<string, { division: Node[]; multiplication: Node[] }>
+  );
+
+  const newValueElements = Object.entries(sortedElements).flatMap(
+    ([unit, { division, multiplication }]) => {
+      const cancelledOut = Math.min(division.length, multiplication.length);
+      const elementsWithUnitsRemoved = [
+        ...division
+          .slice(cancelledOut)
+          .map((element) => ({ operation: "/", value: element } as const)),
+        ...multiplication
+          .slice(cancelledOut)
+          .map((element) => ({ operation: "*", value: element } as const)),
+      ];
+      return elementsWithUnitsRemoved;
+    }
+  );
+
+  return { ...node, values: newValueElements };
 };
 
 const moveAllFactorIntoASingleNumber = (
@@ -197,6 +244,9 @@ const removeUnneccessaryMultiplication = (node: MultiplicationNode): Node => {
   return node;
 };
 
+/**
+ * All multiplication optimizations, that do not look into children other then value nodes
+ */
 export const evaluateBasicMultiplication = (node: Node) => {
   return visitor(
     node,
@@ -207,10 +257,12 @@ export const evaluateBasicMultiplication = (node: Node) => {
       }
 
       const stage1 = removeCancelledOutUnits(node);
-      const stage2 = moveAllFactorIntoASingleNumber(stage1);
+      const stage11 = removeCancelledOutElements(stage1);
+      const stage2 = moveAllFactorIntoASingleNumber(stage11);
       const stage3 = integrateUnitlessNodeIntoUnitNode(stage2);
       const stage4 = removeMultiplicationIdentity(stage3);
       const stage5 = removeUnneccessaryMultiplication(stage4);
+
       debugNode(node);
       debugNode(stage1);
       debugNode(stage5);

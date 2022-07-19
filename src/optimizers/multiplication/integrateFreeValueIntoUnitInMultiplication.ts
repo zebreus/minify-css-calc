@@ -9,7 +9,8 @@ import {
 } from "../../parseCalc";
 import { visitor } from "../../visitor";
 
-/** Integrate a free value into a real value in a multiplication node if possible
+/** @deprecated
+ * Integrate a free value into a real value in a multiplication node if possible
  *
  * 1rem * var(--test) * 2 => 2rem
  *

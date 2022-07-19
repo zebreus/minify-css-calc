@@ -16,9 +16,7 @@ import { minAndMaxToClamp } from "optimizers/minmax/minAndMaxToClamp";
 import { removeObviousMinMaxValues } from "optimizers/minmax/removeObviousMinMaxValues";
 import { evaluateBasicMultiplication } from "optimizers/multiplication/evaluateBasicMultiplication";
 import { expandMultiplications } from "optimizers/multiplication/expandMultiplications";
-import { integrateFreeValueIntoUnitInMultiplication } from "optimizers/multiplication/integrateFreeValueIntoUnitInMultiplication";
 import { integrateNestedMultiplication } from "optimizers/multiplication/integrateNestedMultiplication";
-import { normalizeMultiplication } from "optimizers/multiplication/normalizeMultiplications";
 import { sortNodes } from "optimizers/sortNodes";
 import { stripOptionalInformation } from "optimizers/stripOptionalInformation";
 import { stripUnnecessaryMathNode } from "optimizers/stripUnnecessaryMathNode";
@@ -46,19 +44,14 @@ const optimizations = [
     removeObviousMinMaxValues,
     stripUnnecessaryMathNode,
     addRangeInfoToMinMaxStatements,
-    normalizeMultiplication,
     combineDuplicateNodesInAddition,
     stripUnnecessaryMathNode,
     sortNodes,
-    integrateFreeValueIntoUnitInMultiplication,
   ],
+  // Do a final round of value math
+  [evaluateBasicMultiplication],
   // Clean and reduce tree
-  [
-    sortNodes,
-    removeAdditionIdentity,
-    integrateFreeValueIntoUnitInMultiplication,
-    stripUnnecessaryMathNode,
-  ],
+  [sortNodes, removeAdditionIdentity, stripUnnecessaryMathNode],
   [
     stripUnnecessaryMathNode,
     addNecessaryParenthesis,
