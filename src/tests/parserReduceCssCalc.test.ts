@@ -189,8 +189,9 @@ describe("parser passes the same test suite as reduce-css-calc", () => {
     expect(runParser("calc(500px - 0px)")).toEqual("500px");
   });
 
+  //TODO: reduce-css-calc allows this, but it's not valid calc, so we throw
   test("should not perform addition on unitless values (#3)", () => {
-    expect(runParser("calc(1px + 1)")).toEqual("calc(1px + 1)");
+    expect(() => runParser("calc(1px + 1)")).toThrow();
   });
 
   test("should reduce consecutive substractions (#24) (1)", () => {
