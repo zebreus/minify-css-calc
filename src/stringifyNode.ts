@@ -88,11 +88,7 @@ export const debugNode = (node: Node, indent = 0) => {
       return;
     case "var":
       normalConsole.log(
-        `${new Array(indent).fill(" ").join("")}${node.prefix}${
-          typeof node.value === "string"
-            ? node.value
-            : stringifyNode(node.value)
-        }${node.suffix}`
+        `${new Array(indent).fill(" ").join("")}${stringifyVar(node)}`
       );
       return;
     default:
@@ -124,9 +120,26 @@ const stringifyValue = (node: ValueNode, precision = 5) => {
 };
 
 const stringifyVar = (node: VarNode): string => {
-  return `${node.prefix}${
-    typeof node.value === "string" ? node.value : stringifyNode(node.value)
-  }${node.suffix}`;
+  const replacementStrings = Object.entries(node.values).map(
+    ([key, node]) => [key, stringifyNode(node)] as const
+  );
+  const safeKeys = new Array(replacementStrings.length).fill(0).map(() =>
+    new Array(20)
+      .fill(0)
+      .map(() => Math.random().toString(36)[2])
+      .join("")
+  );
+  const safeTemplate = Object.keys(node.values).reduce(
+    (template, string, index) => template.replaceAll(string, safeKeys[index]),
+    node.value
+  );
+  const result = replacementStrings
+    .map(([key, text], index) => [safeKeys[index], text])
+    .reduce(
+      (template, [key, text]) => template.replaceAll(key, text),
+      safeTemplate
+    );
+  return result;
 };
 
 const stringifyMinMax = (node: MinNode | MaxNode): string => {

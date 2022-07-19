@@ -123,7 +123,7 @@ Exponent
   = "e" [+-]? BaseNumber { return text() }
 
 CustomProperty
-  = !"min(" !"max(" !"clamp(" !"calc(" prefix:([a-z-]+"(") _ value:([^) ]*) _  suffix:")" { return {type: "var", value: `${value.join("")}`, prefix: prefix[0].join("")+prefix[1],suffix: suffix} }
+  = !"min(" !"max(" !"clamp(" !"calc(" prefix:([a-z-]+"(") _ value:([^) ]*) _  suffix:")" { return {type: "var", value: text(), values: []} }
 
 _ "whitespace"
   = [ \t\n\r]*

@@ -31,8 +31,48 @@ test("unit values get stringified", async () => {
 
 test("var values get stringified", async () => {
   expect(
-    stringifyNode({ type: "var", prefix: "var(", suffix: ")", value: "--test" })
+    stringifyNode({
+      type: "var",
+      value: "var(--test)",
+      values: {},
+    })
   ).toEqual("var(--test)");
+});
+
+test("nested notes in var values get optimized", async () => {
+  expect(
+    stringifyNode({
+      type: "var",
+      value: "var(--test, calc(2px + 2px))",
+      values: {
+        ["calc(2px + 2px)"]: {
+          type: "calc",
+          value: {
+            type: "addition",
+            values: [
+              {
+                operation: "+",
+                value: { type: "value", value: 2, unit: "px" },
+              },
+              {
+                operation: "+",
+                value: { type: "value", value: 2, unit: "px" },
+              },
+            ],
+          },
+        },
+      },
+    })
+  ).toEqual("var(--test, calc(2px + 2px))");
+  expect(
+    stringifyNode({
+      type: "var",
+      value: "var(--test, calc(2px + 2px))",
+      values: {
+        ["calc(2px + 2px)"]: { type: "value", value: 4, unit: "px" },
+      },
+    })
+  ).toEqual("var(--test, 4px)");
 });
 
 test("max get stringified", async () => {
