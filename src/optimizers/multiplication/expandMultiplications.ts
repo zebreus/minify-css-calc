@@ -31,7 +31,9 @@ export const expandMultiplications = (node: Node) => {
       .map((value) => value.value);
 
     const multiplicationComponents = multiplicationNodes
-      .map((node) => (node.type === "parenthesis" ? node.value : node))
+      .map((node) =>
+        node.type === "parenthesis" || node.type === "calc" ? node.value : node
+      )
       .map((node) =>
         node.type === "addition"
           ? node.values
@@ -39,7 +41,7 @@ export const expandMultiplications = (node: Node) => {
       );
 
     // const divisionComponents = divisionNodes
-    //   .map((node) => (node.type === "parenthesis" ? node.value : node))
+    //   .map((node) => ((node.type === "parenthesis" || node.type === "calc") ? node.value : node))
     //   .map((node) =>
     //     node.type === "addition"
     //       ? node.values

@@ -4,12 +4,10 @@ import { debugNode, stringifyNode } from "stringifyNode";
 
 export type OptimizerStorage = {
   possibleVarTypes?: Record<string, Array<UnitType>>;
+  knownCalcPrefixes?: Array<string>;
 };
 
-export type OptimizerFunction = (
-  node: Node,
-  storage?: OptimizerStorage
-) => Node;
+export type OptimizerFunction = (node: Node, storage: OptimizerStorage) => Node;
 
 export type OptimizerStage = Array<OptimizerStage> | OptimizerFunction;
 

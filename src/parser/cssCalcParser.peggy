@@ -3,6 +3,13 @@
 //
 // Only accepts numbers and allows for spaces everywhere
 
+RootTemplate
+  = content:RootTemplateContent {
+    const result = {type: "var", value: text(), values: content.values, kind: "root"}
+    console.log(result)
+    return result
+    }
+
 Value
   = Calc
   / Min
@@ -11,10 +18,15 @@ Value
   / Number
   / CustomProperty
 
+CalcPrefix
+  = 'calc' { return text() }
+  / '-' ([a-z]+) '-calc' { return text() }
+  / 'expression' { return text() }
+
 // Root calc
 Calc
-  = "calc(" _ value:Value _ ")" { return value }
-  / "calc(" _ expr:Expression _ ")" { return expr  }
+  = prefix:CalcPrefix "(" _ value:Value _ ")" { return { type: "calc", prefix: prefix, value: value } }
+  / prefix:CalcPrefix "(" _ expr:Expression _ ")" { return { type: "calc", prefix: prefix, value: expr } }
   
 Min
   = "min(" _ expr:Value more:( _ "," _ Value )* _ ")" {
@@ -123,7 +135,34 @@ Exponent
   = "e" [+-]? BaseNumber { return text() }
 
 CustomProperty
-  = !"min(" !"max(" !"clamp(" !"calc(" prefix:([a-z-]+"(") _ value:([^) ]*) _  suffix:")" { return {type: "var", value: text(), values: []} }
+  = !"min(" !"max(" !"clamp(" !"calc(" ([a-z-]+) "(" content:TemplateContent {
+    const result = {type: "var", value: text(), values: content.values, kind: "customProperty"}
+    console.log(result)
+    return result
+    }
+
+SpecialValue
+  = Calc
+  / Min
+  / Max
+  / Clamp
+  / Number
+
+TextValue
+  = value:Value { return {value: value, text: text()}}
+
+RootTextValue
+  = value:Value { return {value: value, text: text()}}
+
+RootTemplateContent
+  = !([ \t\n\r]) value:TextValue tc:RootTemplateContent {return {values: {...tc.values, [value.text]: value.value}, value: text()}}
+  / . tc:RootTemplateContent {return {values: tc.values, value: text()}}
+  / .* {return {values: {}, value: text()}}
+
+TemplateContent
+  = !([ \t\n\r]) value:TextValue tc:TemplateContent {return {values: {...tc.values, [value.text]: value.value}, value: text()}}
+  / [^)] tc:TemplateContent {return {values: tc.values, value: text()}}
+  / ")" {return {values: {}, value: text()}}
 
 _ "whitespace"
   = [ \t\n\r]*

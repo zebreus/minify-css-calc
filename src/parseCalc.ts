@@ -9,6 +9,7 @@ import { tryToKeepOnePositiveNodeInEveryAddition } from "optimizers/addition/try
 import { addNecessaryParenthesis } from "optimizers/addNecessaryParenthesis";
 import { checkMathUnitCompatibility } from "optimizers/checkMathUnitCompatibility";
 import { convertAbsoluteUnitsToCanonicalUnits } from "optimizers/convertAbsoluteUnitsToCanonicalUnits";
+import { detectCalcPrefixes } from "optimizers/detectCalcPrefixes";
 import { addRangeInfoToMinMaxStatements } from "optimizers/minmax/addRangeInfoToMinMaxNodes";
 import { clampToMinAndMax } from "optimizers/minmax/clampToMinAndMax";
 import { integrateNestedMinMaxNodes } from "optimizers/minmax/integrateNestedMinMaxNodes";
@@ -24,7 +25,7 @@ import { stripUnnecessaryParenthesis } from "optimizers/stripUnnecessaryParenthe
 import { stringifyNode } from "./stringifyNode";
 
 const optimizations: OptimizerStage = [
-  [clampToMinAndMax, convertAbsoluteUnitsToCanonicalUnits],
+  [detectCalcPrefixes, clampToMinAndMax, convertAbsoluteUnitsToCanonicalUnits],
   // This stage does most of the optimizations, but may leave the ast weirdly formatted
   [
     sortNodes,
@@ -153,6 +154,7 @@ export type MultiplicationNode = {
 
 export type CalcNode = {
   type: "calc";
+  prefix?: string;
   value: Node;
   rangeInfo?: Array<{ unit: string; min: number; max: number }>;
   possibleUnits?: Array<UnitType>;

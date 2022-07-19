@@ -6,7 +6,7 @@ export const stripUnnecessaryParenthesis = (node: Node) => {
     node,
     () => true,
     (node: Node) => {
-      if (node.type !== "parenthesis") {
+      if (node.type !== "parenthesis" && node.type !== "calc") {
         return node;
       }
 

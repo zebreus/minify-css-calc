@@ -44,7 +44,15 @@ export const reverseVisitor = (
       case "calc":
         return { ...newNode, value: thisVisitor(newNode.value) };
       case "var":
-        return newNode;
+        return {
+          ...newNode,
+          values: Object.fromEntries(
+            Object.entries(newNode.values).map(([key, node]) => [
+              key,
+              thisVisitor(node),
+            ])
+          ),
+        };
       default:
         const x: never = newNode;
         throw new Error("Node has unknown type");

@@ -36,6 +36,7 @@ export const visitor = (
         max: thisVisitor(newNode.max),
       };
     case "parenthesis":
+    case "calc":
       return { ...newNode, value: thisVisitor(newNode.value) };
     case "addition":
       return {
@@ -53,10 +54,16 @@ export const visitor = (
           value: thisVisitor(node.value),
         })),
       };
-    case "calc":
-      return { ...newNode, value: thisVisitor(newNode.value) };
     case "var":
-      return newNode;
+      return {
+        ...newNode,
+        values: Object.fromEntries(
+          Object.entries(newNode.values).map(([key, node]) => [
+            key,
+            thisVisitor(node),
+          ])
+        ),
+      };
     default:
       const x: never = newNode;
       throw new Error("Node has unknown type");

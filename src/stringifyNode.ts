@@ -82,7 +82,9 @@ export const debugNode = (node: Node, indent = 0) => {
       });
       return;
     case "calc":
-      normalConsole.log(`${new Array(indent).fill(" ").join("")}calc(`);
+      normalConsole.log(
+        `${new Array(indent).fill(" ").join("")}${node.prefix ?? "calc"}(`
+      );
       debugNode(node.value, indent + 2);
       normalConsole.log(`${new Array(indent).fill(" ").join("")})`);
       return;
@@ -193,5 +195,5 @@ const stringifyMultiplication = (node: MultiplicationNode): string => {
 };
 
 const stringifyCalc = (node: CalcNode): string => {
-  return `calc(${stringifyNode(node.value)})`;
+  return `${node.prefix ?? "calc"}(${stringifyNode(node.value)})`;
 };
