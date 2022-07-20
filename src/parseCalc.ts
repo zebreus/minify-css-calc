@@ -75,9 +75,7 @@ export const parseCalc = (
   parserFunction: (input: string) => any
 ) => {
   const ast: Node = parserFunction(input);
-  //console.log(ast);
   const optimizedAst = optimizeAst(ast, optimizations);
-  //debugNode(optimizedAst);
   return stringifyNode(optimizedAst);
 };
 

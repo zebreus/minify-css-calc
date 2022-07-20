@@ -71,8 +71,6 @@ export const addRangeInfoToMinMaxStatements = (node: Node) => {
             }))
           : [];
 
-        console.log("rangeinfos", rangeInfos);
-
         const reducedRangeInfos = rangeInfos.reduce(
           (newRangeInfos, rangeInfo) => {
             const sameUnitRange = newRangeInfos.find(
@@ -111,7 +109,6 @@ export const addRangeInfoToMinMaxStatements = (node: Node) => {
 
         if (canBeResolved) {
           if (reducedRangeInfos.length === 1) {
-            console.log("resolved with l1 rangeinfos", reducedRangeInfos);
             return {
               ...node,
               type: "value",
@@ -120,7 +117,6 @@ export const addRangeInfoToMinMaxStatements = (node: Node) => {
               rangeInfo: reducedRangeInfos,
             };
           }
-          console.log("resolved with complex rangeinfos", reducedRangeInfos);
           return {
             ...node,
             values: reducedRangeInfos.map((rangeInfo) => ({
@@ -131,8 +127,6 @@ export const addRangeInfoToMinMaxStatements = (node: Node) => {
             rangeInfo: reducedRangeInfos,
           };
         }
-
-        console.log("added rangeinfos", reducedRangeInfos);
 
         return { ...node, rangeInfo: reducedRangeInfos };
         // const varNodes = node.values.flatMap((value) =>

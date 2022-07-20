@@ -6,7 +6,7 @@
 RootTemplate
   = content:RootTemplateContent {
     const result = {type: "var", value: text(), values: content.values, kind: "root"}
-    console.log(result)
+    // console.log(result)
     return result
     }
 
@@ -145,7 +145,7 @@ CustomPropertyPrefix
 CustomProperty
   = CustomPropertyPrefix content:TemplateContent {
     const result = {type: "var", value: text(), values: content.values, kind: "customProperty"}
-    console.log(result)
+    // console.log(result)
     return result
     }
 

@@ -283,46 +283,6 @@ export const evaluateBasicMultiplication = (node: Node) => {
       debugNode(stage1);
       debugNode(stage5);
       return stage5;
-
-      // const multiplicationValueNodes = valueElements.flatMap((value) => ({...value.value, value: value.operation === "*" ? value.value.value : 1/value.value.value} as ValueNode))
-
-      // const multiplicationValueNodes = valueElements.flatMap((value) => ({...value.value, value: value.operation === "*" ? value.value.value : 1/value.value.value} as ValueNode))
-
-      // const unit = multiplicationValueNodes.flatMap((value) => value.unit).reduce([units, ()])
-
-      // const calculatedNodes = node.values.reduce((calculatedValues, value) => {
-      //   if (value.value.type === "value") {
-      //     const oldValueNode = calculatedValues.find(
-      //       (calculatedValue) =>
-      //         calculatedValue.value.type === "value" &&
-      //         calculatedValue.value.unit === (value.value as ValueNode).unit
-      //     ) as
-      //       | {
-      //           operation: "*" | "/";
-      //           value: ValueNode;
-      //         }
-      //       | undefined;
-      //     if (!oldValueNode) {
-      //       return [...calculatedValues, value];
-      //     }
-      //     const oldValue =
-      //       oldValueNode.operation === "*"
-      //         ? oldValueNode.value.value
-      //         : 1 / oldValueNode.value.value;
-      //     const valueValue =
-      //       value.operation === "*" ? value.value.value : 1 / value.value.value;
-
-      //     const newValue = oldValue * valueValue;
-      //     oldValueNode.operation = "*";
-      //     oldValueNode.value.value = newValue;
-      //     return calculatedValues;
-      //   }
-      //   return [...calculatedValues, value];
-      // }, [] as typeof node.values);
-
-      // console.log(calculatedNodes);
-
-      // return { ...node, values: calculatedNodes };
     }
   );
 };
