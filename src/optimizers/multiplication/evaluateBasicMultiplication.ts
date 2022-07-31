@@ -279,9 +279,6 @@ export const evaluateBasicMultiplication = (node: Node) => {
       const stage4 = removeMultiplicationIdentity(stage3);
       const stage5 = removeUnneccessaryMultiplication(stage4);
 
-      debugNode(node);
-      debugNode(stage1);
-      debugNode(stage5);
       return stage5;
     }
   );
