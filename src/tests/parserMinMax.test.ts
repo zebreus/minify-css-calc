@@ -132,4 +132,8 @@ describe("parser optimizes min, max and clamp", () => {
       "min(3em,3px)"
     );
   });
+
+  test("weird clamp expression does work", async () => {
+    expect(runParser("clamp(0,calc(0.5 + (0.5*0.5)),1)")).toEqual("0.75");
+  });
 });
