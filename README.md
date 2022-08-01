@@ -8,6 +8,7 @@ Parse and minify css calc statements
 - Optimizing calc functions with var()
 - Optimizing nested min, max and clamp functions
 - Mostly compatible with reduce-css-calc
+- Written in TypeScript
 
 # Usage
 
