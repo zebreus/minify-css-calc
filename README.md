@@ -32,4 +32,7 @@ minifyCSSCalc("min(min(5px, 6px), max(3px, 4px))");
 
 minifyCSSCalc("min(min(5rem, 6px), max(3px, 4px))");
 // min(4px,5rem)
+
+minifyCSSCalc("calc(var(--a)/var(--x) + var(--b)/var(--x))");
+// calc((var(--a) + var(--b))/var(--x))
 ```
