@@ -180,7 +180,7 @@ describe("parser does not fail on basic expressions", () => {
     expect(runParser("calc(((1+1+1)*0.5)*1)")).toEqual("1.5");
   });
 
-  test("does not produce weird errors with nested multiplication", () => {
+  test("does not produce weird errors with nested multiplication 1", () => {
     expect(runParser("calc(1*((1-1-1)*0.5))")).toEqual("-0.5");
     expect(runParser("calc(1*((1-1)*0.5))")).toEqual("0");
     expect(runParser("calc(1*((233vw-233px)/233))")).toEqual("calc(1vw - 1px)");
@@ -192,5 +192,9 @@ describe("parser does not fail on basic expressions", () => {
     expect(runParser("calc(14px + 6 * ((100vw - 320px) / 448))")).toEqual(
       "calc(1.33929vw + 9.71429px)"
     );
+  });
+
+  test("does not produce weird errors with nested multiplication 2", () => {
+    expect(runParser("calc((448vw-448px)/112)")).toEqual("calc(4vw - 4px)");
   });
 });

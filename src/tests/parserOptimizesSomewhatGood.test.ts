@@ -90,7 +90,7 @@ describe("parser does do some good/complex optimizations", () => {
       "calc(2*var(--a) + 2*var(--b))"
     );
     expect(runParser("calc((var(--a)+var(--b))/(2))")).toEqual(
-      "calc(0.5*var(--a) + 0.5*var(--b))"
+      "calc((var(--a) + var(--b))*0.5)"
     );
   });
 
@@ -120,5 +120,66 @@ describe("parser does do some good/complex optimizations", () => {
       "calc(var(--a)*var(--b)/(var(--c) + var(--d)))"
     );
     //expect(runParser("calc(var(--test)/var(--test)*2)")).toEqual("2");
+  });
+
+  test("detects common factor in multiplications that will be added", async () => {
+    expect(runParser("calc(var(--a)/var(--x) + var(--b)/var(--x))")).toEqual(
+      "calc((var(--a) + var(--b))/var(--x))"
+    );
+  });
+
+  test("multiplications dont get combined if it would be longer", async () => {
+    expect(runParser("calc((var(--a)+var(--b))*(2))")).toEqual(
+      "calc(2*var(--a) + 2*var(--b))"
+    );
+  });
+
+  test("multiplications get combined if it would be shorter", async () => {
+    expect(runParser("calc((var(--a)+var(--b))*(20))")).toEqual(
+      "calc((var(--a) + var(--b))*20)"
+    );
+    expect(runParser("calc((var(--a)+var(--b))/(2))")).toEqual(
+      "calc((var(--a) + var(--b))*0.5)"
+    );
+  });
+
+  test("complex multiplications get combined to the shortest form 1", async () => {
+    // ab + ac + bc
+    expect(
+      runParser("calc(var(--a)*var(--b)+var(--a)*var(--c)+var(--b)*var(--c))")
+    ).toEqual("calc((var(--a) + var(--b))*var(--c) + var(--a)*var(--b))");
+  });
+
+  test("complex multiplications get combined to the shortest form 2", async () => {
+    // abc + bcd + cda
+    expect(
+      runParser(
+        "calc(var(--a)*var(--b)*var(--c)+var(--b)*var(--c)*var(--d)+var(--c)*var(--d)*var(--a))"
+      )
+    ).toEqual(
+      "calc(((var(--a) + var(--b))*var(--d) + var(--a)*var(--b))*var(--c))"
+    );
+  });
+
+  test("complex multiplications get combined to the shortest form 3", async () => {
+    // abc + bcd + cda + dab
+    expect(
+      runParser(
+        "calc(var(--a)*var(--b)*var(--c)+var(--b)*var(--c)*var(--d)+var(--c)*var(--d)*var(--a)+var(--d)*var(--a)*var(--b))"
+      )
+    ).toEqual(
+      "calc((var(--a) + var(--b))*var(--c)*var(--d) + (var(--c) + var(--d))*var(--a)*var(--b))"
+    );
+  });
+
+  test("complex multiplications get combined to the shortest form 4", async () => {
+    // ab + ac + ad + aehijkl + ehijkl => (b + c + d)*a + ehijkl*(a + 1)
+    expect(
+      runParser(
+        "calc(var(--a)*var(--b)+var(--a)*var(--c)+var(--a)*var(--d)+var(--a)*var(--e)*var(--h)*var(--i)*var(--j)*var(--k)*var(--l)+var(--e)*var(--h)*var(--i)*var(--j)*var(--k)*var(--l))"
+      )
+    ).toEqual(
+      "calc((1 + var(--a))*var(--e)*var(--h)*var(--i)*var(--j)*var(--k)*var(--l) + (var(--b) + var(--c) + var(--d))*var(--a))"
+    );
   });
 });
