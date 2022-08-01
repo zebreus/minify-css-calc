@@ -49,10 +49,17 @@ export const combineDuplicateNodesInAddition = (node: Node) => {
           (element) =>
             !(element.value.type === "value" && element.value.unit === "number")
         );
-        const newMultiplicationNode = {
+        const newMultiplicationNode: MultiplicationNode = {
           ...value.value,
-          values: nonFactorNodes,
-        } as MultiplicationNode;
+          values: nonFactorNodes.length
+            ? nonFactorNodes
+            : [
+                {
+                  operation: "*",
+                  value: { type: "value", unit: "number", value: 1 },
+                },
+              ],
+        };
         return {
           ...value,
           factor: (value.operation === "+" ? 1 : -1) * factor,
