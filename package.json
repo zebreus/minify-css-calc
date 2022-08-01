@@ -1,6 +1,6 @@
 {
   "name": "minify-css-calc",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Parse and minify css calc statements",
   "main": "dist/index.js",
   "files": [
