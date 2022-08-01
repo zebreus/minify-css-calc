@@ -1,6 +1,7 @@
 import { UnitType } from "cssUnitFunctions";
 import { optimizeAst, OptimizerStage } from "optimizeAst";
 import { addCalcOnRootLevelIfRequired } from "optimizers/addCalcOnRootLevelIfRequired";
+import { combineCommonFactors } from "optimizers/addition/combineCommonFactors";
 import { combineDuplicateNodesInAddition } from "optimizers/addition/combineDuplicateNodesInAddition";
 import { evaluateBasicAddition } from "optimizers/addition/evaluateBasicAddition";
 import { integrateNestedAddition } from "optimizers/addition/integrateNestedAddition";
@@ -18,6 +19,7 @@ import { removeObviousMinMaxValues } from "optimizers/minmax/removeObviousMinMax
 import { evaluateBasicMultiplication } from "optimizers/multiplication/evaluateBasicMultiplication";
 import { expandMultiplications } from "optimizers/multiplication/expandMultiplications";
 import { integrateNestedMultiplication } from "optimizers/multiplication/integrateNestedMultiplication";
+import { removeMultiplicationIdentity } from "optimizers/multiplication/removeMultiplicationIdentity";
 import { sortNodes } from "optimizers/sortNodes";
 import { stripOptionalInformation } from "optimizers/stripOptionalInformation";
 import { stripUnnecessaryMathNode } from "optimizers/stripUnnecessaryMathNode";
@@ -48,12 +50,27 @@ const optimizations: OptimizerStage = [
     stripUnnecessaryMathNode,
     sortNodes,
   ],
-  // Do a final round of value math
-  [evaluateBasicMultiplication, evaluateBasicAddition],
+  // Restructure to the shortest form
+  [
+    removeAdditionIdentity,
+    removeMultiplicationIdentity,
+    stripUnnecessaryMathNode,
+    stripUnnecessaryParenthesis,
+    sortNodes,
+    combineCommonFactors,
+    integrateNestedMultiplication,
+    removeMultiplicationIdentity,
+  ],
+  [
+    // Do a final round of value math
+    evaluateBasicMultiplication,
+    evaluateBasicAddition,
+  ],
   // Clean and reduce tree
   [
     sortNodes,
     removeAdditionIdentity,
+    removeMultiplicationIdentity,
     stripUnnecessaryMathNode,
     stripUnnecessaryParenthesis,
   ],
@@ -69,6 +86,40 @@ const optimizations: OptimizerStage = [
     stripOptionalInformation,
   ],
 ];
+
+// Clean and reduce a string without doing complicated math
+const cleanStringStages = [
+  [
+    // Do a round of value math
+    evaluateBasicMultiplication,
+    evaluateBasicAddition,
+  ],
+  [
+    sortNodes,
+    removeAdditionIdentity,
+    removeMultiplicationIdentity,
+    stripUnnecessaryMathNode,
+    stripUnnecessaryParenthesis,
+  ],
+  [
+    // Do a final round of value math
+    evaluateBasicMultiplication,
+    evaluateBasicAddition,
+  ],
+  [
+    stripUnnecessaryMathNode,
+    addNecessaryParenthesis,
+    tryToKeepOnePositiveNodeInEveryAddition,
+    sortNodes,
+    minAndMaxToClamp,
+    stripOptionalInformation,
+  ],
+];
+
+/** A stringify function that can be used to estimate the final length */
+export const cleanStringifyNode = (node: Node) => {
+  return stringifyNode(optimizeAst(node, cleanStringStages));
+};
 
 export const parseCalc = (
   input: string,
