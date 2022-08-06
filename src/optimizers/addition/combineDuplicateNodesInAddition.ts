@@ -3,17 +3,99 @@ import { reverseVisitor } from "reverseVisitor";
 import { stringifyNode } from "stringifyNode";
 import {
   AdditionNode,
+  cleanStringifyNode,
   MultiplicationNode,
   Node,
   ValueNode,
 } from "../../parseCalc";
 import { visitor } from "../../visitor";
 
+const extractFactor = (value: Node) => {
+  // if (value.type !== "value" && value.type !== "multiplication") {
+  //   return {
+  //     value: value,
+  //     factor: 1,
+  //     text: cleanStringifyNode(value),
+  //     operation: "+" as const,
+  //   };
+  // }
+
+  const factorNodes =
+    value.type === "value"
+      ? [{ operation: "*" as const, value: value }]
+      : value.type === "multiplication"
+      ? value.values.flatMap((element) =>
+          element.value.type === "value"
+            ? [{ ...element, value: element.value }]
+            : []
+        )
+      : [];
+
+  const nonFactorNodes =
+    value.type === "value"
+      ? []
+      : value.type === "multiplication"
+      ? value.values.flatMap((element) =>
+          element.value.type !== "value"
+            ? [{ ...element, value: element.value }]
+            : []
+        )
+      : [{ operation: "*" as const, value: value }];
+
+  const factor = factorNodes.reduce(
+    (acc, element) =>
+      element.operation === "*"
+        ? acc * element.value.value
+        : acc / element.value.value,
+    1
+  );
+
+  const allNonFactorNodes = [
+    ...factorNodes
+      .filter((element) => element.value.unit !== "number")
+      .map((element) => ({
+        ...element,
+        value: { ...element.value, value: 1 },
+      })),
+    ...nonFactorNodes,
+  ];
+
+  const newMultiplicationNode: Node = allNonFactorNodes.length
+    ? {
+        ...value,
+        type: "multiplication" as const,
+        values: nonFactorNodes,
+      }
+    : {
+        type: "multiplication" as const,
+        values: [
+          {
+            operation: "*" as const,
+            value: {
+              type: "value" as const,
+              unit: "number" as const,
+              value: 1,
+            },
+          },
+        ],
+      };
+
+  return {
+    factor: factor,
+    value: newMultiplicationNode,
+    text: cleanStringifyNode(newMultiplicationNode),
+    operation: "+" as const,
+  };
+};
+
 /** Move all factors in multiplications into a seperate value
  *
  * var(--a) + var(--a) + 2 => var(--a)*2 + 2
  * var(--a) + 2*var(--a) + 2 => var(--a)*3 + 2
  *
+ * This is quite buggy and can be replaced by combineCommonFactors
+ * You should integrate additions before this
+ * You should evalutate factors in multiplications after this
  */
 export const combineDuplicateNodesInAddition = (node: Node) => {
   return reverseVisitor(node, (node: Node) => {
@@ -22,98 +104,56 @@ export const combineDuplicateNodesInAddition = (node: Node) => {
     }
 
     const values = node.values.map((value) => {
-      if (value.value.type === "value") {
-        const normalizedValue = {
-          ...value.value,
-          value: 1,
-        };
-        return {
-          ...value,
-          factor: (value.operation === "+" ? 1 : -1) * value.value.value,
-          text: stringifyNode(normalizedValue),
-          value: normalizedValue as ValueNode,
-          operation: "+" as const,
-        };
-      }
-      if (value.value.type === "multiplication") {
-        const factor = value.value.values.reduce(
-          (acc, element) =>
-            element.value.type === "value" && element.value.unit === "number"
-              ? element.operation === "*"
-                ? acc * element.value.value
-                : acc / element.value.value
-              : acc,
-          1
-        );
-        const nonFactorNodes = value.value.values.filter(
-          (element) =>
-            !(element.value.type === "value" && element.value.unit === "number")
-        );
-        const newMultiplicationNode: MultiplicationNode = {
-          ...value.value,
-          values: nonFactorNodes.length
-            ? nonFactorNodes
-            : [
-                {
-                  operation: "*",
-                  value: { type: "value", unit: "number", value: 1 },
-                },
-              ],
-        };
-        return {
-          ...value,
-          factor: (value.operation === "+" ? 1 : -1) * factor,
-          value: newMultiplicationNode,
-          text: stringifyNode(newMultiplicationNode),
-          operation: "+" as const,
-        };
-      }
+      const thing = extractFactor(value.value);
       return {
-        ...value,
-        factor: value.operation === "+" ? 1 : -1,
-        text: stringifyNode(value.value),
-        operation: "+" as const,
+        ...thing,
+        factor: (value.operation === "+" ? 1 : -1) * thing.factor,
       };
     });
 
-    const valueMap = values.reduce((valueMap, value) => {
-      return {
-        ...valueMap,
-        [value.text]: {
-          count: (valueMap[value.text]?.count ?? 0) + value.factor,
-          content: value.value,
-        },
-      };
-    }, {} as Record<string, { count: number; content: Node }>);
+    const summedValues = values.reduce((acc, value) => {
+      const existingValue = acc.find((element) => element.text === value.text);
+      if (existingValue) {
+        existingValue.factor += value.factor;
+      } else {
+        acc.push(value);
+      }
+      return acc;
+    }, [] as typeof values);
 
-    const valueObjects: {
-      operation: "+" | "-";
-      value: Node;
-    }[] = Object.values(valueMap)
-      .filter(({ count }) => count)
-      .map(({ count, content }) => {
-        return {
-          operation: count > 0 ? "+" : "-",
-          value:
-            Math.abs(count) === 1
-              ? content
-              : {
-                  type: "multiplication",
-                  values: [
-                    {
-                      operation: "*",
-                      value: {
-                        type: "value",
-                        unit: "number",
-                        value: Math.abs(count),
-                      },
-                    } as const,
-                    { operation: "*", value: content } as const,
-                  ],
-                },
-        };
-      });
+    const valuesWithoutZeros = values.filter((value) => value.factor !== 0);
 
-    return { ...node, values: valueObjects };
+    const valuesWithIntegratedFactors = values.map((value) => ({
+      operation: value.factor >= 0 ? ("+" as const) : ("-" as const),
+      value: {
+        ...value.value,
+        values: [
+          ...value.value.values,
+          {
+            operation: "*" as const,
+            value: {
+              type: "value" as const,
+              unit: "number" as const,
+              value: Math.abs(value.factor),
+            },
+          },
+        ],
+      },
+    }));
+
+    const newValues = valuesWithIntegratedFactors.length
+      ? valuesWithIntegratedFactors
+      : [
+          {
+            operation: "+" as const,
+            value: {
+              type: "value" as const,
+              unit: "number" as const,
+              value: 0,
+            },
+          },
+        ];
+
+    return { ...node, values: newValues };
   });
 };
