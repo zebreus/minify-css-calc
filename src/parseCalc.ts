@@ -27,7 +27,12 @@ import { stripUnnecessaryParenthesis } from "optimizers/stripUnnecessaryParenthe
 import { stringifyNode } from "./stringifyNode";
 
 const optimizations: OptimizerStage = [
-  [detectCalcPrefixes, clampToMinAndMax, convertAbsoluteUnitsToCanonicalUnits],
+  [
+    detectCalcPrefixes,
+    clampToMinAndMax,
+    convertAbsoluteUnitsToCanonicalUnits,
+    stripUnnecessaryParenthesis,
+  ],
   // This stage does most of the optimizations, but may leave the ast weirdly formatted
   [
     sortNodes,
