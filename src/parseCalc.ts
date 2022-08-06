@@ -25,6 +25,7 @@ import { stripOptionalInformation } from "optimizers/stripOptionalInformation";
 import { stripUnnecessaryMathNode } from "optimizers/stripUnnecessaryMathNode";
 import { stripUnnecessaryParenthesis } from "optimizers/stripUnnecessaryParenthesis";
 import { stringifyNode } from "./stringifyNode";
+import Big from "big.js";
 
 const optimizations: OptimizerStage = [
   [
@@ -151,14 +152,14 @@ export type Node =
 export type MaxNode = {
   type: "max";
   values: Array<Node>;
-  rangeInfo?: Array<{ unit: string; min: number; max: number }>;
+  rangeInfo?: Array<{ unit: string; min: Big; max: Big }>;
   possibleUnits?: Array<UnitType>;
 };
 
 export type MinNode = {
   type: "min";
   values: Array<Node>;
-  rangeInfo?: Array<{ unit: string; min: number; max: number }>;
+  rangeInfo?: Array<{ unit: string; min: Big; max: Big }>;
   possibleUnits?: Array<UnitType>;
 };
 
@@ -167,15 +168,15 @@ export type ClampNode = {
   min: Node;
   value: Node;
   max: Node;
-  rangeInfo?: Array<{ unit: string; min: number; max: number }>;
+  rangeInfo?: Array<{ unit: string; min: Big; max: Big }>;
   possibleUnits?: Array<UnitType>;
 };
 
 export type ValueNode = {
   type: "value";
-  value: number;
+  value: Big;
   unit: string;
-  rangeInfo?: Array<{ unit: string; min: number; max: number }>;
+  rangeInfo?: Array<{ unit: string; min: Big; max: Big }>;
   possibleUnits?: Array<UnitType>;
 };
 
@@ -183,28 +184,28 @@ export type VarNode = {
   type: "var";
   value: string;
   values: Record<string, Node>;
-  rangeInfo?: Array<{ unit: string; min: number; max: number }>;
+  rangeInfo?: Array<{ unit: string; min: Big; max: Big }>;
   possibleUnits?: Array<UnitType>;
 };
 
 export type ParenthesisNode = {
   type: "parenthesis";
   value: Node;
-  rangeInfo?: Array<{ unit: string; min: number; max: number }>;
+  rangeInfo?: Array<{ unit: string; min: Big; max: Big }>;
   possibleUnits?: Array<UnitType>;
 };
 
 export type AdditionNode = {
   type: "addition";
   values: Array<{ value: Node; operation: "+" | "-" }>;
-  rangeInfo?: Array<{ unit: string; min: number; max: number }>;
+  rangeInfo?: Array<{ unit: string; min: Big; max: Big }>;
   possibleUnits?: Array<UnitType>;
 };
 
 export type MultiplicationNode = {
   type: "multiplication";
   values: Array<{ value: Node; operation: "*" | "/" }>;
-  rangeInfo?: Array<{ unit: string; min: number; max: number }>;
+  rangeInfo?: Array<{ unit: string; min: Big; max: Big }>;
   possibleUnits?: Array<UnitType>;
 };
 
@@ -212,6 +213,6 @@ export type CalcNode = {
   type: "calc";
   prefix?: string;
   value: Node;
-  rangeInfo?: Array<{ unit: string; min: number; max: number }>;
+  rangeInfo?: Array<{ unit: string; min: Big; max: Big }>;
   possibleUnits?: Array<UnitType>;
 };

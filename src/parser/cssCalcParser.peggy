@@ -2,6 +2,9 @@
 // ==========================
 //
 // Only accepts numbers and allows for spaces everywhere
+{
+  const Big = require("big.js")
+}
 
 RootTemplate
   = content:RootTemplateContent {
@@ -128,7 +131,7 @@ UnitSuffix
 
 Number "number"
   = number:$( _ [+-]? BaseNumber Exponent? ) unit:$(UnitSuffix?)  {
-    return {type: "value", value: parseFloat(number, 10), unit: unit || "number" }; }
+    return {type: "value", value: Big(number), unit: unit || "number" }; }
 
 BaseNumber
   = [0-9]* "." [0-9]+ { return text() }
