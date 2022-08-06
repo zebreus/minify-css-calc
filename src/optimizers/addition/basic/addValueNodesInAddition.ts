@@ -1,5 +1,6 @@
 import { reverseVisitor } from "reverseVisitor";
 import { MultiplicationNode, Node, ValueNode } from "parseCalc";
+import Big from "big.js";
 
 export const addValueNodesInAddition = (node: Node) => {
   return reverseVisitor(node, (node: Node) => {
@@ -18,11 +19,13 @@ export const addValueNodesInAddition = (node: Node) => {
     const sumPerUnit = valueElements.reduce(
       (acc, value) => ({
         ...acc,
-        [value.value.unit]:
-          (acc[value.value.unit] ?? 0) +
-          (value.operation === "+" ? value.value.value : -value.value.value),
+        [value.value.unit]: (acc[value.value.unit] ?? Big(0)).add(
+          value.operation === "+"
+            ? value.value.value
+            : value.value.value.mul(-1)
+        ),
       }),
-      {} as Record<string, number>
+      {} as Record<string, Big>
     );
 
     const newElements = Object.entries(sumPerUnit).map(([unit, value]) => ({

@@ -1,3 +1,5 @@
+import { Big } from "bigWrapper";
+
 export function includes<T extends U, U>(
   coll: ReadonlyArray<T>,
   el: U
@@ -120,11 +122,11 @@ export const absoluteLengthUnitFactors: Record<AbsoluteLengthUnit, number> = {
   px: 1,
 } as const;
 
-export const angleUnitFactors: Record<AngleUnit, number> = {
-  rad: 1,
-  deg: Math.PI / 180,
-  grad: Math.PI / 200,
-  turn: Math.PI * 2,
+export const angleUnitFactors: Record<AngleUnit, number | Big> = {
+  rad: Big(1),
+  deg: Big(Math.PI).div(180),
+  grad: Big(Math.PI).div(200),
+  turn: Big(Math.PI).mul(2),
 } as const;
 
 export const timeUnitFactors: Record<TimeUnit, number> = {
@@ -144,7 +146,7 @@ export const resolutionUnitFactors: Record<ResolutionUnit, number> = {
   x: 1,
 } as const;
 
-type UnitWithValue = { unit: string; value: number };
+type UnitWithValue = { unit: string; value: Big };
 
 export const unitTypes = [
   "number",
@@ -168,10 +170,10 @@ const getLowercaseUnitName = (element: UnitWithValue | string) => {
 
 const isInteger = (element: UnitWithValue | string): boolean => {
   const unit = getLowercaseUnitName(element);
-  const value = typeof element === "string" ? 0.5 : element.value;
+  const value = typeof element === "string" ? Big(0.5) : element.value;
   return (
     includes(integerUnits, unit) ||
-    (includes(numberUnits, unit) && Number.isInteger(value))
+    (includes(numberUnits, unit) && Number.isInteger(value.toNumber()))
   );
 };
 
@@ -187,9 +189,9 @@ const isPercentage = (element: UnitWithValue | string): boolean => {
 
 const isAbsoluteLength = (element: UnitWithValue | string): boolean => {
   const unit = getLowercaseUnitName(element);
-  const value = typeof element === "string" ? 1 : element.value;
+  const value = typeof element === "string" ? Big(1) : element.value;
   return (
-    includes(absoluteLengthUnits, unit) || (isNumber(element) && value === 0)
+    includes(absoluteLengthUnits, unit) || (isNumber(element) && value.eq(0))
   );
 };
 
@@ -197,44 +199,44 @@ const isViewportPercentageLength = (
   element: UnitWithValue | string
 ): boolean => {
   const unit = getLowercaseUnitName(element);
-  const value = typeof element === "string" ? 1 : element.value;
+  const value = typeof element === "string" ? Big(1) : element.value;
   return (
     includes(viewportPercentageLengthUnits, unit) ||
-    (isNumber(element) && value === 0)
+    (isNumber(element) && value.eq(0))
   );
 };
 
 const isLength = (element: UnitWithValue | string): boolean => {
   const unit = getLowercaseUnitName(element);
-  const value = typeof element === "string" ? 1 : element.value;
+  const value = typeof element === "string" ? Big(1) : element.value;
   return (
     includes(lengthUnits, unit) ||
     includes(percentageUnits, unit) ||
-    (isNumber(element) && value === 0)
+    (isNumber(element) && value.eq(0))
   );
 };
 
 const isAngle = (element: UnitWithValue | string): boolean => {
   const unit = getLowercaseUnitName(element);
-  const value = typeof element === "string" ? 1 : element.value;
-  return includes(angleUnits, unit) || (isNumber(element) && value === 0);
+  const value = typeof element === "string" ? Big(1) : element.value;
+  return includes(angleUnits, unit) || (isNumber(element) && value.eq(0));
 };
 
 const isTime = (element: UnitWithValue | string): boolean => {
   const unit = getLowercaseUnitName(element);
-  const value = typeof element === "string" ? 1 : element.value;
-  return includes(timeUnits, unit) || (isNumber(element) && value === 0);
+  const value = typeof element === "string" ? Big(1) : element.value;
+  return includes(timeUnits, unit) || (isNumber(element) && value.eq(0));
 };
 
 const isFrequency = (element: UnitWithValue | string): boolean => {
   const unit = getLowercaseUnitName(element);
-  const value = typeof element === "string" ? 1 : element.value;
-  return includes(frequencyUnits, unit) || (isNumber(element) && value === 0);
+  const value = typeof element === "string" ? Big(1) : element.value;
+  return includes(frequencyUnits, unit) || (isNumber(element) && value.eq(0));
 };
 
 const isResolution = (element: UnitWithValue | string): boolean => {
   const unit = getLowercaseUnitName(element);
-  const value = typeof element === "string" ? 1 : element.value;
+  const value = typeof element === "string" ? Big(1) : element.value;
   return includes(resolutionUnits, unit);
 };
 
@@ -247,35 +249,35 @@ export const convertToCanonicalUnit = (
 
   if (includes(absoluteLengthUnits, unit)) {
     return {
-      value: value * absoluteLengthUnitFactors[unit],
+      value: value.mul(absoluteLengthUnitFactors[unit]),
       unit: "px",
     };
   }
 
   if (includes(angleUnits, unit)) {
     return {
-      value: value * angleUnitFactors[unit],
+      value: value.mul(angleUnitFactors[unit]),
       unit: "rad",
     };
   }
 
   if (includes(timeUnits, unit)) {
     return {
-      value: value * timeUnitFactors[unit],
+      value: value.mul(timeUnitFactors[unit]),
       unit: "s",
     };
   }
 
   if (includes(frequencyUnits, unit)) {
     return {
-      value: value * frequencyUnitFactors[unit],
+      value: value.mul(frequencyUnitFactors[unit]),
       unit: "hz",
     };
   }
 
   if (includes(resolutionUnits, unit)) {
     return {
-      value: value * resolutionUnitFactors[unit],
+      value: value.mul(resolutionUnitFactors[unit]),
       unit: "dppx",
     };
   }
@@ -336,12 +338,11 @@ export const compareValues = (a: UnitWithValue, b: UnitWithValue) => {
     );
   }
 
-  const comparison =
-    canonicalA.value > canonicalB.value
-      ? 1
-      : canonicalA.value < canonicalB.value
-      ? -1
-      : 0;
+  const comparison = canonicalA.value.gt(canonicalB.value)
+    ? 1
+    : canonicalA.value.lt(canonicalB.value)
+    ? -1
+    : 0;
 
   // Check all direkt comparisons. Because we use canonical units, we can assume that the values are in the same unit, if both are the same absolute category
   if (
@@ -353,8 +354,8 @@ export const compareValues = (a: UnitWithValue, b: UnitWithValue) => {
     // (isPercentage(canonicalA) && isPercentage(canonicalB)) ||
     // (isAbsoluteLength(canonicalA) && isAbsoluteLength(canonicalB)) ||
     canonicalA.unit === canonicalB.unit ||
-    canonicalA.value === 0 ||
-    canonicalB.value === 0
+    canonicalA.value.eq(0) ||
+    canonicalB.value.eq(0)
   ) {
     return comparison;
   }
@@ -474,6 +475,6 @@ export const checkValidDivider = (element: UnitWithValue | UnitType[]) => {
 
   return (
     compatibleUnits.includes("number") &&
-    (Array.isArray(element) || element.value !== 0)
+    (Array.isArray(element) || !element.value.eq(0))
   );
 };

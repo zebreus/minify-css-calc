@@ -1,3 +1,4 @@
+import Big from "big.js";
 import { compareValues, isNumber } from "cssUnitFunctions";
 import { reverseVisitor } from "reverseVisitor";
 import { stringifyNode } from "stringifyNode";
@@ -15,10 +16,10 @@ const normalizeMultiplicationNode = (node: MultiplicationNode) => {
     (factor, value) =>
       value.value.type === "value"
         ? value.operation === "*"
-          ? factor * value.value.value
-          : factor / value.value.value
+          ? factor.mul(value.value.value)
+          : factor.div(value.value.value)
         : factor,
-    1
+    Big(1)
   );
 
   const normalizedValues = values.flatMap((value) =>
@@ -29,8 +30,8 @@ const normalizeMultiplicationNode = (node: MultiplicationNode) => {
             {
               ...value,
               operation: "*" as const,
-              value: { ...value.value, value: 1 },
-              text: stringifyNode({ ...value.value, value: 1 }),
+              value: { ...value.value, value: Big(1) },
+              text: stringifyNode({ ...value.value, value: Big(1) }),
             },
           ]
       : [{ ...value, text: stringifyNode(value.value) }]

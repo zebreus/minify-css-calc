@@ -26,12 +26,12 @@ export const tryToKeepOnePositiveNodeInEveryAddition = (node: Node) => {
       const positiveValueElements = valueElements.map((element) => ({
         ...element,
         operation:
-          element.operation === (element.value.value >= 0 ? "+" : "-")
+          element.operation === (element.value.value.gte(0) ? "+" : "-")
             ? ("+" as const)
             : ("-" as const),
         value: {
           ...element.value,
-          value: Math.abs(element.value.value),
+          value: element.value.value.abs(),
         } as ValueNode,
       }));
 
@@ -47,7 +47,7 @@ export const tryToKeepOnePositiveNodeInEveryAddition = (node: Node) => {
               operation: "+" as const,
               value: {
                 ...positiveValueElements[0].value,
-                value: -1 * positiveValueElements[0].value.value,
+                value: positiveValueElements[0].value.value.mul(-1),
               } as ValueNode,
             },
             ...positiveValueElements.slice(1),

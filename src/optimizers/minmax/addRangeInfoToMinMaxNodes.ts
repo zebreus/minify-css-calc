@@ -1,3 +1,4 @@
+import Big from "big.js";
 import { compareValues } from "cssUnitFunctions";
 import { reverseVisitor } from "reverseVisitor";
 import {
@@ -16,7 +17,7 @@ const mapByUnit = (values: Array<ValueNode>) => {
     }
     acc[unit].push(value);
     return acc;
-  }, {} as Record<string, Array<number>>);
+  }, {} as Record<string, Array<Big>>);
 };
 
 /**
@@ -66,8 +67,8 @@ export const addRangeInfoToMinMaxStatements = (node: Node) => {
         const varRangeInfos = hasVarNodes
           ? rangeInfos.map((rangeInfo) => ({
               ...rangeInfo,
-              min: -Infinity,
-              max: Infinity,
+              min: Big("-1e100000"),
+              max: Big("1e100000"),
             }))
           : [];
 
@@ -103,8 +104,8 @@ export const addRangeInfoToMinMaxStatements = (node: Node) => {
           varRangeInfos
         );
 
-        const canBeResolved = reducedRangeInfos.every(
-          (rangeInfo) => rangeInfo.min === rangeInfo.max
+        const canBeResolved = reducedRangeInfos.every((rangeInfo) =>
+          rangeInfo.min.eq(rangeInfo.max)
         );
 
         if (canBeResolved) {

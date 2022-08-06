@@ -1,3 +1,4 @@
+import Big from "big.js";
 import { compareValues, isNumber } from "cssUnitFunctions";
 import { reverseVisitor } from "reverseVisitor";
 import { stringifyNode } from "stringifyNode";
@@ -45,9 +46,9 @@ const extractFactor = (value: Node) => {
   const factor = factorNodes.reduce(
     (acc, element) =>
       element.operation === "*"
-        ? acc * element.value.value
-        : acc / element.value.value,
-    1
+        ? acc.mul(element.value.value)
+        : acc.div(element.value.value),
+    Big(1)
   );
 
   const allNonFactorNodes = [
@@ -55,7 +56,7 @@ const extractFactor = (value: Node) => {
       .filter((element) => element.value.unit !== "number")
       .map((element) => ({
         ...element,
-        value: { ...element.value, value: 1 },
+        value: { ...element.value, value: Big(1) },
       })),
     ...nonFactorNodes,
   ];
@@ -74,7 +75,7 @@ const extractFactor = (value: Node) => {
             value: {
               type: "value" as const,
               unit: "number" as const,
-              value: 1,
+              value: Big(1),
             },
           },
         ],
@@ -107,24 +108,26 @@ export const combineDuplicateNodesInAddition = (node: Node) => {
       const thing = extractFactor(value.value);
       return {
         ...thing,
-        factor: (value.operation === "+" ? 1 : -1) * thing.factor,
+        factor: thing.factor.mul(value.operation === "+" ? 1 : -1),
       };
     });
 
     const summedValues = values.reduce((acc, value) => {
       const existingValue = acc.find((element) => element.text === value.text);
       if (existingValue) {
-        existingValue.factor += value.factor;
+        existingValue.factor = existingValue.factor.add(value.factor);
       } else {
         acc.push(value);
       }
       return acc;
     }, [] as typeof values);
 
-    const valuesWithoutZeros = values.filter((value) => value.factor !== 0);
+    const valuesWithoutZeros = summedValues.filter(
+      (value) => !value.factor.eq(0)
+    );
 
-    const valuesWithIntegratedFactors = values.map((value) => ({
-      operation: value.factor >= 0 ? ("+" as const) : ("-" as const),
+    const valuesWithIntegratedFactors = valuesWithoutZeros.map((value) => ({
+      operation: value.factor.gte(0) ? ("+" as const) : ("-" as const),
       value: {
         ...value.value,
         values: [
@@ -134,7 +137,7 @@ export const combineDuplicateNodesInAddition = (node: Node) => {
             value: {
               type: "value" as const,
               unit: "number" as const,
-              value: Math.abs(value.factor),
+              value: value.factor.abs(),
             },
           },
         ],
@@ -149,7 +152,7 @@ export const combineDuplicateNodesInAddition = (node: Node) => {
             value: {
               type: "value" as const,
               unit: "number" as const,
-              value: 0,
+              value: Big(0),
             },
           },
         ];

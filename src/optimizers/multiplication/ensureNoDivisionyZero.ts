@@ -15,7 +15,7 @@ export const ensureNoDivisionByZero = (node: Node) => {
         if (
           value.value.type === "value" &&
           value.operation === "/" &&
-          value.value.value === 0
+          value.value.value.eq(0)
         ) {
           throw new Error(`Division by zero in ${stringifyNode(node)}`);
         }

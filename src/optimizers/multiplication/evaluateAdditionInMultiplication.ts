@@ -1,3 +1,4 @@
+import Big from "big.js";
 import { MultiplicationNode, Node, ValueNode } from "../../parseCalc";
 import { visitor } from "../../visitor";
 
@@ -28,11 +29,13 @@ export const evaluateBasicMultiplication = (node: Node) => {
           const oldValue =
             oldValueNode.operation === "*"
               ? oldValueNode.value.value
-              : 1 / oldValueNode.value.value;
+              : Big(1).div(oldValueNode.value.value);
           const valueValue =
-            value.operation === "*" ? value.value.value : 1 / value.value.value;
+            value.operation === "*"
+              ? value.value.value
+              : Big(1).div(value.value.value);
 
-          const newValue = oldValue * valueValue;
+          const newValue = oldValue.mul(valueValue);
           oldValueNode.operation = "*";
           oldValueNode.value.value = newValue;
           return calculatedValues;

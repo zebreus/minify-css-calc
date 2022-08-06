@@ -1,5 +1,6 @@
 import { reverseVisitor } from "reverseVisitor";
 import { MultiplicationNode, Node, ValueNode } from "parseCalc";
+import Big from "big.js";
 
 export const removeAdditionIdentity = (node: Node) => {
   return reverseVisitor(node, (node: Node) => {
@@ -9,14 +10,14 @@ export const removeAdditionIdentity = (node: Node) => {
 
     const newValues = node.values.filter(
       (valueNode) =>
-        !(valueNode.value.type === "value" && valueNode.value.value === 0)
+        !(valueNode.value.type === "value" && valueNode.value.value.eq(0))
     );
 
     if (newValues.length === 0) {
       return {
         type: "value",
         unit: "number",
-        value: 0,
+        value: Big(0),
       };
     }
 

@@ -1,3 +1,4 @@
+import Big from "big.js";
 import { reverseVisitor } from "reverseVisitor";
 import { cleanStringifyNode } from "../../parseCalc";
 import { AdditionNode, MultiplicationNode, Node } from "../../parseCalc";
@@ -96,7 +97,7 @@ const constructPermutation = (
                       : {
                           type: "value" as const,
                           unit: "number" as const,
-                          value: 1,
+                          value: Big(1),
                         },
                   })),
                 },

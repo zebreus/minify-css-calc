@@ -1,3 +1,4 @@
+import Big from "big.js";
 import { MultiplicationNode, Node } from "../parseCalc";
 import { visitor } from "../visitor";
 
@@ -32,8 +33,8 @@ export const stripUnnecessaryMathNode = (node: Node) => {
           unit: node.values[0].value.unit,
           value:
             node.values[0].operation === "-"
-              ? node.values[0].value.value * -1
-              : 1 / node.values[0].value.value,
+              ? node.values[0].value.value.mul(-1)
+              : Big(1).div(node.values[0].value.value),
         };
       }
 

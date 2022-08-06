@@ -14,9 +14,7 @@ export const removeAdditionIdentity = (node: Node) => {
         ...node,
         values: node.values.filter(
           (valueNode) =>
-            (valueNode.value.type !== "value" &&
-              valueNode.value.type !== "var") ||
-            valueNode.value.value !== 0
+            valueNode.value.type !== "value" || !valueNode.value.value.eq(0)
         ),
       };
     }

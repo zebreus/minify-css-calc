@@ -1,3 +1,4 @@
+import Big from "big.js";
 import { debugNode, stringifyNode } from "stringifyNode";
 import { MultiplicationNode, Node, ValueNode } from "../../parseCalc";
 import { visitor } from "../../visitor";
@@ -115,20 +116,24 @@ const moveAllFactorIntoASingleNumber = (
 
   const globalFactor = valueElements.reduce(
     (factor, element) =>
-      factor *
-      (element.operation === "*"
-        ? element.value.value
-        : 1 / element.value.value),
-    1
+      factor.mul(
+        element.operation === "*"
+          ? element.value.value
+          : Big(1).div(element.value.value)
+      ),
+    Big(1)
   );
 
   const normalizedValueElements = valueElements
     .filter((element) => element.value.unit !== "number")
-    .map((element) => ({ ...element, value: { ...element.value, value: 1 } }));
+    .map((element) => ({
+      ...element,
+      value: { ...element.value, value: Big(1) },
+    }));
 
   const newValueElements = [
     {
-      operation: "*",
+      operation: "*" as const,
       value: { type: "value", value: globalFactor, unit: "number" },
     } as const,
     ...normalizedValueElements,
@@ -155,11 +160,12 @@ const integrateUnitlessNodeIntoUnitNode = (
 
   const unitlessFactor = unitlessNodes.reduce(
     (factor, element) =>
-      factor *
-      (element.operation === "*"
-        ? element.value.value
-        : 1 / element.value.value),
-    1
+      factor.mul(
+        element.operation === "*"
+          ? element.value.value
+          : Big(1).div(element.value.value)
+      ),
+    Big(1)
   );
 
   const newNodeBase =
@@ -168,12 +174,12 @@ const integrateUnitlessNodeIntoUnitNode = (
     ) ||
     ({
       operation: "*",
-      value: { type: "value", value: 1, unit: "number" },
+      value: { type: "value", value: Big(1), unit: "number" },
     } as const);
 
-  const factor =
-    newNodeBase.value.value *
-    (newNodeBase.operation === "*" ? unitlessFactor : 1 / unitlessFactor);
+  const factor = newNodeBase.value.value.mul(
+    newNodeBase.operation === "*" ? unitlessFactor : Big(1).div(unitlessFactor)
+  );
 
   const newNode = {
     ...newNodeBase,
@@ -200,7 +206,7 @@ const removeMultiplicationIdentity = (
       !(
         value.value.type === "value" &&
         value.value.unit === "number" &&
-        value.value.value === 1
+        value.value.value.eq(1)
       )
   );
 
@@ -208,7 +214,10 @@ const removeMultiplicationIdentity = (
     return {
       ...node,
       values: [
-        { operation: "*", value: { type: "value", value: 1, unit: "number" } },
+        {
+          operation: "*",
+          value: { type: "value", value: Big(1), unit: "number" },
+        },
       ],
     };
   }
@@ -219,14 +228,14 @@ const removeMultiplicationIdentity = (
 const removeUnneccessaryMultiplication = (node: MultiplicationNode): Node => {
   if (
     node.values.find(
-      (element) => element.value.type === "value" && element.value.value === 0
+      (element) => element.value.type === "value" && element.value.value.eq(0)
     )
   ) {
     return {
       ...node,
       type: "value",
       unit: "number",
-      value: 0,
+      value: Big(0),
     };
   }
   if (node.values.length === 1 && node.values[0].operation === "*") {
@@ -237,7 +246,7 @@ const removeUnneccessaryMultiplication = (node: MultiplicationNode): Node => {
       ...node,
       type: "value",
       unit: "number",
-      value: 1,
+      value: Big(1),
     };
   }
   return node;

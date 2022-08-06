@@ -1,3 +1,5 @@
+import Big from "big.js";
+import { bigMax, bigMin } from "bigWrapper";
 import {
   MaxNode,
   MinNode,
@@ -14,7 +16,7 @@ const mapByUnit = (values: Array<ValueNode>) => {
     }
     acc[unit].push(value);
     return acc;
-  }, {} as Record<string, Array<number>>);
+  }, {} as Record<string, Array<Big>>);
 };
 
 /**
@@ -43,7 +45,7 @@ export const removeObviousMinMaxValues = (node: Node) => {
         type: "value" as const,
         unit: unit,
         value: values.reduce(
-          (acc, value) => Math[node.type](acc, value),
+          (acc, value) => (node.type === "min" ? bigMin : bigMax)(acc, value),
           values[0]
         ),
       }));

@@ -1,5 +1,6 @@
 import { reverseVisitor } from "reverseVisitor";
 import { MultiplicationNode, Node, ValueNode } from "parseCalc";
+import Big from "big.js";
 
 export const removeMultiplicationIdentity = (node: Node) => {
   return reverseVisitor(node, (node: Node) => {
@@ -11,7 +12,7 @@ export const removeMultiplicationIdentity = (node: Node) => {
       (valueNode) =>
         valueNode.value.type === "value" &&
         valueNode.value.unit === "number" &&
-        valueNode.value.value === -1
+        valueNode.value.value.eq(-1)
     ).length;
     const removeValues = negativeOneNodesCount % 2 === 0 ? [-1, 1] : [1];
 
@@ -20,7 +21,7 @@ export const removeMultiplicationIdentity = (node: Node) => {
         !(
           valueNode.value.type === "value" &&
           valueNode.value.unit === "number" &&
-          removeValues.includes(valueNode.value.value)
+          removeValues.includes(valueNode.value.value.toNumber())
         )
     );
 
@@ -28,7 +29,7 @@ export const removeMultiplicationIdentity = (node: Node) => {
       return {
         type: "value",
         unit: "number",
-        value: 1,
+        value: Big(1),
       };
     }
 

@@ -1,3 +1,4 @@
+import Big from "big.js";
 import { CssUnit, cssUnits } from "cssUnitFunctions";
 import {
   AdditionNode,
@@ -11,6 +12,7 @@ import {
   ValueNode,
   VarNode,
 } from "parseCalc";
+
 let normalConsole = require("console");
 
 export const stringifyNode = (node: Node) => {
@@ -100,13 +102,13 @@ export const debugNode = (node: Node, indent = 0) => {
 };
 
 //Reliably round to a given number of decimal places
-const round = (value: number, maxPrecision: number) =>
-  maxPrecision === -1
+const round = (value: Big, maxPrecision?: number) =>
+  maxPrecision === undefined
     ? value.toString()
     : +(+value.toFixed(maxPrecision + 1)).toFixed(maxPrecision);
 
-const stringifyValue = (node: ValueNode, precision = 5) => {
-  if (node.value == 0) {
+const stringifyValue = (node: ValueNode, precision: number = 5) => {
+  if (node.value.eq(0)) {
     return "0";
   }
   if (node.unit === "number" || node.unit === "integer") {

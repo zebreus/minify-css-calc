@@ -1,3 +1,4 @@
+import Big from "big.js";
 import { compareValues, isNumber } from "cssUnitFunctions";
 import { reverseVisitor } from "reverseVisitor";
 import { stringifyNode } from "stringifyNode";
@@ -31,8 +32,8 @@ export const integrateFreeValueIntoUnitInMultiplication = (node: Node) => {
     );
 
     const factor = freeFactors.reduce(
-      (factor, value) => factor * value.value,
-      1
+      (factor, value) => factor.mul(value.value),
+      Big(1)
     );
 
     const remainingValues = node.values.filter(
@@ -57,7 +58,7 @@ export const integrateFreeValueIntoUnitInMultiplication = (node: Node) => {
         ...node,
         values: [
           ...remainingValues,
-          ...(factor !== 1
+          ...(!factor.eq(1)
             ? [
                 {
                   operation: "*" as const,
@@ -81,7 +82,7 @@ export const integrateFreeValueIntoUnitInMultiplication = (node: Node) => {
           ...valueWithDimension,
           value: {
             ...(valueWithDimension.value as ValueNode),
-            value: (valueWithDimension.value as ValueNode).value * factor,
+            value: (valueWithDimension.value as ValueNode).value.mul(factor),
           },
         },
       ],
