@@ -34,20 +34,27 @@ export const optimizeAst = (
 const processStage = (
   ast: Node,
   stage: OptimizerStage,
-  storage: OptimizerStorage
+  storage: OptimizerStorage,
+  limit = 10,
+  depth = 0
 ): Node => {
+  if (limit === 0) {
+    throw new Error("Max recursion depth reached");
+  }
+
   if (Array.isArray(stage)) {
     const [currentStage, ...nextStages] = stage;
     const previousString = JSON.stringify(ast);
     const optimizedAst = stage.reduce(
-      (ast, stage) => processStage(ast, stage, storage),
+      (ast, stage, index) =>
+        processStage(ast, stage, storage, limit, depth + 1),
       ast
     );
     const optimizedString = JSON.stringify(optimizedAst);
 
     return previousString === optimizedString
       ? optimizedAst
-      : processStage(optimizedAst, stage, storage);
+      : processStage(optimizedAst, stage, storage, limit - 1, depth);
   } else {
     return stage(ast, storage);
   }
