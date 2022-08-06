@@ -9,6 +9,7 @@ Parse and minify css calc statements
 - Optimizing nested min, max and clamp functions
 - Mostly compatible with reduce-css-calc
 - Written in TypeScript
+- Support for numbers in scientific notation
 
 # Usage
 
