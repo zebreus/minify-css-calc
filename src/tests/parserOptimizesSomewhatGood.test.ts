@@ -182,4 +182,99 @@ describe("parser does do some good/complex optimizations", () => {
       "calc((1 + var(--a))*var(--e)*var(--h)*var(--i)*var(--j)*var(--k)*var(--l) + (var(--b) + var(--c) + var(--d))*var(--a))"
     );
   });
+
+  test("multiplications get combined 1", async () => {
+    expect(runParser("calc( var(--x) + var(--x) )")).toEqual(
+      "calc(2*var(--x))"
+    );
+  });
+
+  test("multiplications get combined 2", async () => {
+    expect(runParser("calc( var(--x) + var(--x) + var(--x)*2 )")).toEqual(
+      "calc(4*var(--x))"
+    );
+  });
+
+  test("isolated problem 1", async () => {
+    expect(runParser("calc( ( 0.5 - 0.5 ) * 5 )")).toEqual("0");
+  });
+
+  test("isolated problem 2", async () => {
+    expect(() =>
+      runParser("clamp( 0, calc( ( 0.5 - 0.5 ) * 5 ), 1 )")
+    ).not.toThrow();
+  });
+
+  test("No rounding errors happen", async () => {
+    expect(runParser("calc( 5e29 + 1 - 5e29 )")).toEqual("1");
+  });
+
+  test("Big and small numbers are printed correctly", async () => {
+    expect(runParser("calc( 1e-30 )")).toEqual("1e-30");
+    expect(runParser("calc( 1e30 )")).toEqual("1e+30");
+  });
+
+  test("does not crash on long and complex equation", async () => {
+    expect(
+      runParser(
+        "calc( clamp(0, calc( ( max(calc(255/255), calc(0/255), calc(0/255)) - min(calc(255/255), calc(0/255), calc(0/255)) ) * 10e99 ), 1) * ( ( max(calc(255/255), calc(0/255), calc(0/255)) - min(calc(255/255), calc(0/255), calc(0/255)) ) / ( ( clamp( 0, calc( ( 0.5 - calc( ( max(calc(255/255), calc(0/255), calc(0/255)) + min(calc(255/255), calc(0/255), calc(0/255)) ) / 2 ) + 10e-30 ) * 1e30 ), 1 ) * ( max(calc(255/255), calc(0/255), calc(0/255)) + min(calc(255/255), calc(0/255), calc(0/255)) + 10e-30 ) ) + ( clamp( 0, calc( ( calc( ( max(calc(255/255), calc(0/255), calc(0/255)) + min(calc(255/255), calc(0/255), calc(0/255)) ) / 2 ) - 0.5 ) * 1e30 ), 1 ) * ( 2 - max(calc(255/255), calc(0/255), calc(0/255)) - min(calc(255/255), calc(0/255), calc(0/255)) + 10e-20 ) ) ) ) )"
+      )
+    ).toEqual("1");
+  });
+
+  test.skip("does not crash on really complex equation temp", async () => {
+    expect(
+      runParser(
+        "calc( clamp(0, calc( 10e99 ), 1) * ( 1 / ( ( clamp( 0, calc( ( 10e-30 ) * 1e30 ), 1 ) * ( 1 + 10e-30 ) ) + ( clamp( 0, calc( 0 * 1e30 ), 1 ) * ( 1 + 10e-20 ) ) ) ) )"
+      )
+    ).toEqual("1");
+
+    expect(runParser("calc( ( 0.5 - 0.5 ) * 1e30 )")).toEqual("0");
+    expect(runParser("calc( 0.5 - 0.5 + 1e-30 )")).toEqual("0");
+    expect(runParser("calc( 1e-30 * 1e30 )")).toEqual("1");
+    expect(runParser("calc( ( 0.5 - 0.5 + 1e-30 ) * 1e30 )")).toEqual("1");
+    expect(runParser("calc( ( 0.5 - 0.5 + 1e-30 ) * 1e30 )")).toEqual("1");
+    expect(runParser("clamp( 0, calc( ( 0.5 - 0.5 ) * 5 ), 1 )")).toEqual("0");
+
+    expect(
+      runParser(
+        "calc( clamp(0, calc( 10e99 ), 1)     * ( 1 / ( ( clamp( 0, calc( (                       10e-30 ) * 1e30 ), 1 ) * ( 1 +     10e-30 ) ) + ( clamp( 0, calc( ( 0.5 - 0.5 )           * 1e30 ), 1 ) * ( 1 + 10e-20 ) ) ) ) )"
+      )
+    ).toEqual("1");
+
+    expect(
+      runParser(
+        "calc( clamp(0, calc( 1 * 10e99 ), 1) * ( 1 / ( ( clamp( 0, calc( ( 0.5 - 0.5           + 10e-30 ) * 1e30 ), 1 ) * ( 1 + 0 + 10e-30 ) ) + ( clamp( 0, calc( ( 0.5           - 0.5 ) * 1e30 ), 1 ) * ( 2 - 1 - 0 + 10e-20 ) ) ) ) )"
+      )
+    ).toEqual("1");
+
+    expect(
+      runParser(
+        "calc( clamp(0, calc( 1 * 10e99 ), 1) * ( 1 / ( ( clamp( 0, calc( ( 0.5 - 0.5           + 10e-30 ) * 1e30 ), 1 ) * ( 1 + 0 + 10e-30 ) ) + ( clamp( 0, calc( ( 0.5           - 0.5 ) * 1e30 ), 1 ) * ( 2 - 1 - 0 + 10e-20 ) ) ) ) )"
+      )
+    ).toEqual("1");
+
+    expect(
+      runParser(
+        "calc( clamp(0, calc( 1 * 10e99 ), 1) * ( 1 / ( ( clamp( 0, calc( ( 0.5 - calc( 1 / 2 ) + 10e-30 ) * 1e30 ), 1 ) * ( 1 + 0 + 10e-30 ) ) + ( clamp( 0, calc( ( calc( 1 / 2 ) - 0.5 ) * 1e30 ), 1 ) * ( 2 - 1 - 0 + 10e-20 ) ) ) ) )"
+      )
+    ).toEqual("1");
+
+    expect(
+      runParser(
+        "calc( clamp(0, calc( ( 1 - 0 ) * 10e99 ), 1) * ( ( 1 - 0 ) / ( ( clamp( 0, calc( ( 0.5 - calc( ( 1 + 0 ) / 2 ) + 10e-30 ) * 1e30 ), 1 ) * ( 1 + 0 + 10e-30 ) ) + ( clamp( 0, calc( ( calc( ( 1 + 0 ) / 2 ) - 0.5 ) * 1e30 ), 1 ) * ( 2 - 1 - 0 + 10e-20 ) ) ) ) )"
+      )
+    ).toEqual("1");
+
+    expect(
+      runParser(
+        "calc( clamp(0, calc( ( max(1, 0, 0) - min(1, 0, 0) ) * 10e99 ), 1) * ( ( max(1, 0, 0) - min(1, 0, 0) ) / ( ( clamp( 0, calc( ( 0.5 - calc( ( max(1, 0, 0) + min(1, 0, 0) ) / 2 ) + 10e-30 ) * 1e30 ), 1 ) * ( max(1, 0, 0) + min(1, 0, 0) + 10e-30 ) ) + ( clamp( 0, calc( ( calc( ( max(1, 0, 0) + min(1, 0, 0) ) / 2 ) - 0.5 ) * 1e30 ), 1 ) * ( 2 - max(1, 0, 0) - min(1, 0, 0) + 10e-20 ) ) ) ) )"
+      )
+    ).toEqual("1");
+    expect(
+      runParser(
+        "calc( clamp(0, calc( ( max(calc(255/255), calc(0/255), calc(0/255)) - min(calc(255/255), calc(0/255), calc(0/255)) ) * 10e99 ), 1) * ( ( max(calc(255/255), calc(0/255), calc(0/255)) - min(calc(255/255), calc(0/255), calc(0/255)) ) / ( ( clamp( 0, calc( ( 0.5 - calc( ( max(calc(255/255), calc(0/255), calc(0/255)) + min(calc(255/255), calc(0/255), calc(0/255)) ) / 2 ) + 10e-30 ) * 1e30 ), 1 ) * ( max(calc(255/255), calc(0/255), calc(0/255)) + min(calc(255/255), calc(0/255), calc(0/255)) + 10e-30 ) ) + ( clamp( 0, calc( ( calc( ( max(calc(255/255), calc(0/255), calc(0/255)) + min(calc(255/255), calc(0/255), calc(0/255)) ) / 2 ) - 0.5 ) * 1e30 ), 1 ) * ( 2 - max(calc(255/255), calc(0/255), calc(0/255)) - min(calc(255/255), calc(0/255), calc(0/255)) + 10e-20 ) ) ) ) )"
+      )
+    ).toEqual("1");
+  });
 });
