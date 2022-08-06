@@ -1,34 +1,7 @@
 import { runParser } from "./runParser";
 
 describe("parser does not fail on basic expressions", () => {
-  test("empty string is not valid", async () => {
-    expect(() => runParser("")).not.toThrow();
-    expect(() => runParser("calc()")).toThrow();
-  });
 
-  test("only numbers are valid", async () => {
-    expect(runParser("2")).toEqual("2");
-    expect(runParser(".9")).toEqual("0.9");
-    expect(runParser("-10")).toEqual("-10");
-    expect(runParser("+10")).toEqual("10");
-  });
-
-  test("toplevel expressions are not valid", async () => {
-    expect(() => runParser("5  10")).not.toThrow();
-    expect(() => runParser("5 , 10 , 9")).not.toThrow();
-    expect(() => runParser("5-10")).toThrow();
-    expect(() => runParser("5 -10")).not.toThrow();
-    expect(() => runParser("5- 10")).toThrow();
-    expect(() => runParser("5 - 10")).toThrow();
-  });
-
-  test("toplevel expressions are not valid", async () => {
-    expect(() => runParser("5+10")).toThrow();
-    expect(() => runParser("5-10")).toThrow();
-    expect(() => runParser("5/10")).toThrow();
-    expect(() => runParser("5*10")).toThrow();
-    expect(() => runParser("(10)")).toThrow();
-  });
 
   test("supports integers", async () => {
     expect(runParser("calc(4)")).toEqual("4");
