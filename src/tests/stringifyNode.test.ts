@@ -147,12 +147,12 @@ test("clamp gets stringified", async () => {
 });
 
 test("addition get stringified", async () => {
-  expect(() =>
+  expect(
     stringifyNode({
       type: "addition",
       values: [],
     })
-  ).toThrow();
+  ).toEqual("0");
   expect(
     stringifyNode({
       type: "addition",

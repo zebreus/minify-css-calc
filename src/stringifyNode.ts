@@ -160,7 +160,7 @@ const stringifyParenthesis = (node: ParenthesisNode): string => {
 
 const stringifyAddition = (node: AdditionNode): string => {
   if (node.values.length === 0) {
-    throw new Error("Can not stringify empty addition node");
+    return "0";
   }
   const positiveValues = node.values
     .filter((value) => value.operation === "+")
