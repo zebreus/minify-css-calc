@@ -101,7 +101,9 @@ export const debugNode = (node: Node, indent = 0) => {
 
 //Reliably round to a given number of decimal places
 const round = (value: number, maxPrecision: number) =>
-  +(+value.toFixed(maxPrecision + 1)).toFixed(maxPrecision);
+  maxPrecision === -1
+    ? value.toString()
+    : +(+value.toFixed(maxPrecision + 1)).toFixed(maxPrecision);
 
 const stringifyValue = (node: ValueNode, precision = 5) => {
   if (node.value == 0) {
