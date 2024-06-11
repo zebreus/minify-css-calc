@@ -1,17 +1,31 @@
 import { benchmarkSuite } from "@zebreus/jest-bench";
 import { runParser } from "./runParser";
+// @ts-ignore-error: No types available for educe-css-calc
+import reduceCssCalc from "reduce-css-calc";
 
 benchmarkSuite("Benchmark minify", {
   ["Single number"]: () => {
-    runParser("calc(15px + 15px)");
+    runParser("15px");
+  },
+
+  ["Single number reduce"]: () => {
+    reduceCssCalc("15px");
   },
 
   ["Simple expression"]: () => {
     runParser("calc(15px + 15px)");
   },
 
+  ["Simple expression reduce"]: () => {
+    reduceCssCalc("calc(15px + 15px)");
+  },
+
   ["Complex expression"]: () => {
     runParser("calc(14px + 6 * ((100vw - 320px) / 448))");
+  },
+
+  ["Complex expression reduce"]: () => {
+    reduceCssCalc("calc(14px + 6 * ((100vw - 320px) / 448))");
   },
 
   ["Really complex expression"]: () => {
@@ -22,5 +36,9 @@ benchmarkSuite("Benchmark minify", {
 
   ["Simple expression with vars"]: () => {
     runParser("calc(10px - (100px - var(--mouseX)))");
+  },
+
+  ["Simple expression with vars reduce"]: () => {
+    reduceCssCalc("calc(10px - (100px - var(--mouseX)))");
   },
 });
